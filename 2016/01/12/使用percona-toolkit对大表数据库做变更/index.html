@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://wfirooooooo.github.io/2016/01/12/使用percona-toolkit对大表数据库做变更/index.html">
 <meta property="og:site_name" content="tech show">
 <meta property="og:description" content="最近有一个需求,要对线上的一个数据库大表加一个字段,在测试环境测试的时候,直接alter table,导致表死锁时间过长,需要改变操作方式.针对mysql的操作,percona有一套工具集percona-toolkit很好用,决定使用其提供的pt-online-schema-change命令进行操作.它能够实现在不锁表读写的情况下进行在线大表结构的变更.下面是使用pt-online-schema-">
-<meta property="og:updated_time" content="2016-01-12T06:41:08.000Z">
+<meta property="og:updated_time" content="2016-01-12T08:18:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用percona-toolkit对大表数据库做变更">
 <meta name="twitter:description" content="最近有一个需求,要对线上的一个数据库大表加一个字段,在测试环境测试的时候,直接alter table,导致表死锁时间过长,需要改变操作方式.针对mysql的操作,percona有一套工具集percona-toolkit很好用,决定使用其提供的pt-online-schema-change命令进行操作.它能够实现在不锁表读写的情况下进行在线大表结构的变更.下面是使用pt-online-schema-">
@@ -84,7 +84,7 @@
       
         <p>最近有一个需求,要对线上的一个数据库大表加一个字段,在测试环境测试的时候,直接alter table,导致表死锁时间过长,需要改变操作方式.<br>针对mysql的操作,percona有一套工具集percona-toolkit很好用,决定使用其提供的pt-online-schema-change命令进行操作.<br>它能够实现在不锁表读写的情况下进行在线大表结构的变更.<br>下面是使用pt-online-schema-change的小贴士.</p>
 <p>percona-toolkit 2.2.16版,rpm包依赖于一些perl包,需要先安装:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y perl-IO-Socket-SSL perl-TermReadKey perl-Time-HiRes perl-DBI  perl-DBD-MySQL</span><br></pre></td></tr></table></figure></p>
-<p>percona-toolkit-2.2.16.noarch.rpm下载<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.percona.com/software/mysql-tools/percona-toolkit</span><br></pre></td></tr></table></figure></p>
+<p>percona-toolkit-2.2.16.noarch.rpm下载<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://www.percona.com/downloads/percona-toolkit/<span class="number">2.2</span>.<span class="number">16</span>/RPM/percona-toolkit-<span class="number">2.2</span>.<span class="number">16</span>-<span class="number">1</span>.noarch.rpm</span><br></pre></td></tr></table></figure></p>
 <p>安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -ivh percona-toolkit-<span class="number">2.2</span>.<span class="number">16</span>.noarch.rpm</span><br></pre></td></tr></table></figure></p>
 <p>查看pt-online-schema-change帮助<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pt-online-schema-change --help</span><br></pre></td></tr></table></figure></p>
 <p>使用pt-online-schema-change修改表有几个前提<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> 服务器上要有提供临时表的空间,用于数据交换</span><br><span class="line"><span class="number">2</span> 数据库表要有主键或唯一索引,它需要根据这个进行数据同步</span><br></pre></td></tr></table></figure></p>
@@ -97,7 +97,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://wfirooooooo.github.io/2016/01/12/使用percona-toolkit对大表数据库做变更/" data-id="cijb15rog000167s6y70zbari" class="article-share-link">Share</a>
+      <a data-url="http://wfirooooooo.github.io/2016/01/12/使用percona-toolkit对大表数据库做变更/" data-id="cijb4n3pi0001jss6bbh9z3nw" class="article-share-link">Share</a>
       
       
     </footer>
