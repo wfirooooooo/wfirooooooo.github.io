@@ -61,6 +61,53 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-使用percona-toolkit对大表数据库做变更" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/01/12/使用percona-toolkit对大表数据库做变更/" class="article-date">
+  <time datetime="2016-01-12T06:36:02.000Z" itemprop="datePublished">2016-01-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/01/12/使用percona-toolkit对大表数据库做变更/">使用percona-toolkit对大表数据库做变更</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近有一个需求,要对线上的一个数据库大表加一个字段,在测试环境测试的时候,直接alter table,导致表死锁时间过长,需要改变操作方式.<br>针对mysql的操作,percona有一套工具集percona-toolkit很好用,决定使用其提供的pt-online-schema-change命令进行操作.<br>它能够实现在不锁表读写的情况下进行在线大表结构的变更.<br>下面是使用pt-online-schema-change的小贴士.</p>
+<p>percona-toolkit 2.2.16版,rpm包依赖于一些perl包,需要先安装:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y perl-IO-Socket-SSL perl-TermReadKey perl-Time-HiRes perl-DBI  perl-DBD-MySQL</span><br></pre></td></tr></table></figure></p>
+<p>percona-toolkit-2.2.16.noarch.rpm下载<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.percona.com/software/mysql-tools/percona-toolkit</span><br></pre></td></tr></table></figure></p>
+<p>安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -ivh percona-toolkit-<span class="number">2.2</span>.<span class="number">16</span>.noarch.rpm</span><br></pre></td></tr></table></figure></p>
+<p>查看pt-online-schema-change帮助<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pt-online-schema-change --help</span><br></pre></td></tr></table></figure></p>
+<p>使用pt-online-schema-change修改表有几个前提<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> 服务器上要有提供临时表的空间,用于数据交换</span><br><span class="line"><span class="number">2</span> 数据库表要有主键或唯一索引,它需要根据这个进行数据同步</span><br></pre></td></tr></table></figure></p>
+<p>修改表结构的示例(添加一列字段)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#只显示执行指令,不进行真的操作</span></span><br><span class="line">pt-online-schema-change --user=root --password=<span class="number">123456</span> --recursion-method=processlist --alter=<span class="string">"add column pttest varchar(20)"</span> h=<span class="number">192.168</span>.<span class="number">10.12</span>,D=t2,t=two --dry-run --print</span><br><span class="line"><span class="comment">#真正执行</span></span><br><span class="line">pt-online-schema-change --user=root --password=<span class="number">123456</span> --recursion-method=processlist --alter=<span class="string">"add column pttest varchar(20)"</span> h=<span class="number">192.168</span>.<span class="number">10.12</span>,D=t2,t=two --execute --print</span><br></pre></td></tr></table></figure></p>
+<p>如果在修改的过程中写入的数据量过大,也会报错,是因为默认的chunk-size和chunk-size-limit比较小,可以适当调大<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#rows=(chunk-size * chunk-size-limit)</span></span><br><span class="line">pt-online-schema-change --user=root --password=<span class="number">123456</span> --recursion-method=processlist --chunk-size=<span class="number">10000</span> --chunk-size-limit=<span class="number">20.0</span> --alter=<span class="string">"add column pttest varchar(20)"</span> h=<span class="number">192.168</span>.<span class="number">10.12</span>,D=t2,t=two --execute --print</span><br></pre></td></tr></table></figure></p>
+<p>最后说几句,<br>1 线上数据库尽量别做变更,尤其是数据量很大了以后,前期设计一定要考虑周全.<br>2 操作前做好数据备份.<br>3 一定在负载小的时候做.</p>
+<p>参考站点:<br><a href="http://www.cnblogs.com/zhoujinyi/p/3491059.html" target="_blank" rel="external">http://www.cnblogs.com/zhoujinyi/p/3491059.html</a><br><a href="http://www.cnblogs.com/wangtao_20/p/3504395.html" target="_blank" rel="external">http://www.cnblogs.com/wangtao_20/p/3504395.html</a></p>
+<p>have fun!</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://wfirooooooo.github.io/2016/01/12/使用percona-toolkit对大表数据库做变更/" data-id="cijb15rog000167s6y70zbari" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tomcat的定制使用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/01/07/tomcat的定制使用/" class="article-date">
@@ -102,7 +149,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://wfirooooooo.github.io/2016/01/07/tomcat的定制使用/" data-id="cij9s88ma00019vs63alzdrtc" class="article-share-link">Share</a>
+      <a data-url="http://wfirooooooo.github.io/2016/01/07/tomcat的定制使用/" data-id="cijb15roj000267s63htaop4i" class="article-share-link">Share</a>
       
       
     </footer>
@@ -147,7 +194,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://wfirooooooo.github.io/2016/01/06/hello-world/" data-id="cij9s88kt00009vs6tt6awia1" class="article-share-link">Share</a>
+      <a data-url="http://wfirooooooo.github.io/2016/01/06/hello-world/" data-id="cijb15rn4000067s6pqddwwr4" class="article-share-link">Share</a>
       
       
     </footer>
@@ -172,7 +219,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a><span class="archive-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -182,6 +229,10 @@
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/01/12/使用percona-toolkit对大表数据库做变更/">使用percona-toolkit对大表数据库做变更</a>
+          </li>
         
           <li>
             <a href="/2016/01/07/tomcat的定制使用/">tomcat的定制使用</a>
