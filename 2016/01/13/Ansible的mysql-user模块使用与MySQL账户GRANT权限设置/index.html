@@ -1,0 +1,186 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Ansible的mysql_user模块使用与MySQL账户GRANT权限设置 | tech show</title>
+  <meta name="author" content="wfir">
+  
+  <meta name="description" content="前两天使用ansible进行mysql主从的部署,遇到一个使用不当ansible-mysql模块,导致mysql root账户权限改变的小问题,记录一下.
+mysql版本5.6.28
+创建数据库后,root账户默认有GRANT权限
+1234567mysql&amp;gt; show grants;+----">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Ansible的mysql_user模块使用与MySQL账户GRANT权限设置"/>
+  <meta property="og:site_name" content="tech show"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="tech show" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">tech show</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2016-01-13T10:07:06.000Z"><a href="/2016/01/13/Ansible的mysql-user模块使用与MySQL账户GRANT权限设置/">2016-01-13</a></time>
+      
+      
+  
+    <h1 class="title">Ansible的mysql_user模块使用与MySQL账户GRANT权限设置</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>前两天使用ansible进行mysql主从的部署,遇到一个使用不当ansible-mysql模块,导致mysql root账户权限改变的小问题,记录一下.</p>
+<p>mysql版本5.6.28</p>
+<p>创建数据库后,root账户默认有GRANT权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show grants;</span><br><span class="line">+---------------------------------------------------------------------+</span><br><span class="line">| Grants <span class="keyword">for</span> root@localhost                                           |</span><br><span class="line">+---------------------------------------------------------------------+</span><br><span class="line">| GRANT ALL PRIVILEGES ON *.* TO <span class="string">'root'</span>@<span class="string">'localhost'</span> WITH GRANT OPTION |</span><br><span class="line">| GRANT PROXY ON <span class="string">''</span>@<span class="string">''</span> TO <span class="string">'root'</span>@<span class="string">'localhost'</span> WITH GRANT OPTION        |</span><br><span class="line">+---------------------------------------------------------------------+</span><br></pre></td></tr></table></figure>
+<p>权限对应的字段为<br>mysql库<br>user表<br>Grant_priv字段,默认是Y</p>
+<p>如果不小心取消了root的GRANT权限,可以通过修改字段值的方式进行恢复</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; use mysql</span><br><span class="line">mysql&gt; update user <span class="built_in">set</span> Grant_priv=<span class="string">'Y'</span> <span class="built_in">where</span> user=<span class="string">'root'</span>;</span><br><span class="line">mysql&gt; flush privileges;</span><br></pre></td></tr></table></figure>
+<p>ansible有一个mysql_user的模块,可以对mysql账户进行操作.<br>在初始化root密码时,如果priv写成下面的样子会取消mysql root的GRANT权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">priv:*.*:ALL</span><br></pre></td></tr></table></figure>
+<p>建议在使用ansible的mysql_user模块时,对于初始化root密码,有两个方法<br>1 不加priv选项<br>2 priv选项添加grant值,即: priv:<em>.</em>:ALL,GRANT</p>
+<p>保证了mysql root账户GRANT权限,后续的添加主从复制账户权限操作就可以进行下去了.</p>
+<p>have fun!</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/ansible-mysql/">ansible mysql</a>
+  </div>
+
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">留言</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/01/13/Ansible的mysql-user模块使用与MySQL账户GRANT权限设置/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜尋">
+    <input type="hidden" name="q" value="site:wfirooooooo.github.io">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">標籤</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/ansible-mysql/">ansible mysql</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql-percona-toolkit/">mysql percona-toolkit</a><small>1</small></li>
+  
+    <li><a href="/tags/tomcat/">tomcat</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2016 wfir
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
