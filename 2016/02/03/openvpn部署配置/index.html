@@ -11,9 +11,7 @@ openvpn密钥登录方式部署
 参考ucloud openvpn setup
 openvpn系统账户密码登录方式部署
 服务端配置
-openvpn使用openvpn-auth-pam.so模块进行验证
-
-下载openvpn源码包,找到plugin/auth_pam">
+openvpn使用openvpn-auth-pam.so模块进行验证如果你用openvpn的源码编译auth-pam模块很可能会失败">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -73,13 +71,13 @@ openvpn使用openvpn-auth-pam.so模块进行验证
 <p>参考<a href="https://docs.ucloud.cn/software/vpn/OpenVPN4CentOS.html" target="_blank" rel="external">ucloud openvpn setup</a></p>
 <p>openvpn系统账户密码登录方式部署</p>
 <p>服务端配置</p>
-<p>openvpn使用openvpn-auth-pam.so模块进行验证</p>
+<p>openvpn使用openvpn-auth-pam.so模块进行验证<br>如果你用openvpn的源码编译auth-pam模块很可能会失败,我告诉你openvpn-auth-pam.so在哪</p>
 <ol>
-<li><p>下载openvpn源码包,找到plugin/auth_pam文件夹</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install -y pam-devel</span><br><span class="line"><span class="built_in">cd</span> plugin/auth_pam</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<li><p>安装openvpn后,openvpn-auth-pam.so在以下地方</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/lib64/openvpn/plugins/openvpn-auth-pam.so</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>拷贝openvpn-auth-pam.so到openvpn配置目录下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp openvpn-auth-pam.so /etc/openvpn/</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp /usr/lib64/openvpn/plugins/openvpn-auth-pam.so /etc/openvpn/</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>server.conf配置文件如下</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">port <span class="number">6666</span></span><br><span class="line">proto tcp</span><br><span class="line">dev tun</span><br><span class="line">ca /etc/openvpn/ca.crt                <span class="comment">#文件名与创建服务端密钥步骤定义的文件名一致</span></span><br><span class="line">cert /etc/openvpn/server.crt          <span class="comment">#文件名与创建服务端密钥步骤定义的文件名一致</span></span><br><span class="line">key /etc/openvpn/server.key           <span class="comment">#文件名与创建服务端密钥步骤定义的文件名一致</span></span><br><span class="line">dh /etc/openvpn/dh2048.pem            <span class="comment">#文件名与创建服务端密钥步骤定义的文件名一致</span></span><br><span class="line">server <span class="number">10.10</span>.<span class="number">0.0</span> <span class="number">255.255</span>.<span class="number">255.0</span></span><br><span class="line">ifconfig-pool-persist ipp.txt</span><br><span class="line">push <span class="string">"route 192.168.1.0 255.255.255.0"</span></span><br><span class="line">keepalive <span class="number">10</span> <span class="number">120</span></span><br><span class="line">comp-lzo</span><br><span class="line">plugin /etc/openvpn/openvpn-auth-pam.so login</span><br><span class="line">client-cert-not-required</span><br><span class="line">persist-key </span><br><span class="line">persist-tun </span><br><span class="line">status /var/<span class="built_in">log</span>/openvpn-status.log </span><br><span class="line"><span class="built_in">log</span> /var/<span class="built_in">log</span>/openvpn.log</span><br><span class="line">verb <span class="number">4</span></span><br></pre></td></tr></table></figure>
