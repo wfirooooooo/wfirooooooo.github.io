@@ -50,6 +50,48 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-02-25T03:54:41.000Z"><a href="/2016/02/25/LVS-DR模式部署配置/">2016-02-25</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/02/25/LVS-DR模式部署配置/">LVS/DR模式部署配置</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>lVS/DR配合Keepalived实现服务的高可用和负载均衡的文章已经非常多了,我这里记录一下生产环境的使用情况.<br>以针对Redis从服务提供负载读为例进行说明:</p>
+<p>服务器信息<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lvs/keepalived&#26381;&#21153;&#22120;&#9;&#9;192.168.10.11&#10;lvs/keepalived&#26381;&#21153;&#22120;&#9;&#9;192.168.10.12&#10;redis&#20174;&#26381;&#21153;&#22120;1&#9;&#9;&#9;192.168.10.110&#10;redis&#20174;&#26381;&#21153;&#22120;2&#9;&#9;&#9;192.168.10.120&#10;&#10;vip(&#22312;lvs&#26381;&#21153;&#22120;&#32465;&#23450;)&#9;&#9;192.168.10.150</span><br></pre></td></tr></table></figure></p>
+<p>基本架构图<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10;          192.168.10.150:6379(vip)&#10;/          \&#10;    &#9;&#9;       /            \&#10;      192.168.10.110:6379     192.168.10.120:6379</span><br></pre></td></tr></table></figure></p>
+<p>基本软件安装<br>keepalived安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y ipvsadm libnl-devel popt-devel keepalived</span><br></pre></td></tr></table></figure></p>
+<p>keepalived配置文件/etc/keepalived/keepalived.conf<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">global_defs &#123;&#10;  router_id LVS_MASTER&#10;&#125;&#10;&#10;vrrp_instance VI_1 &#123;&#10;  state BACKUP&#10;  interface eth0&#10;  virtual_router_id 51&#10;  priority 100&#9;&#9;#&#21478;&#19968;&#21488;keepalived&#37197;&#32622;&#20026;90&#10;  advert_int 1&#10;  nopreempt&#10;  authentication &#123;&#10;    auth_type PASS&#10;    auth_pass 1111&#10;  &#125;&#10;  virtual_ipaddress &#123;&#10;    192.168.10.150&#10;  &#125;&#10;&#125;&#10; &#10;virtual_server 192.168.10.150 6379 &#123;&#10;  delay_loop 6&#10;  lb_algo rr&#10;  lb_kind DR&#10;  nat_mask 255.255.255.0&#10;  protocol TCP&#10; &#10;  real_server 192.168.10.110 6379 &#123;&#10;    weight 1&#10;    TCP_CHECK &#123;&#10;      connect_timeout 10&#10;      nb_get_retry 3&#10;      delay_before_retry 3&#10;      connect_port 6379&#10;    &#125;&#10;  &#125;&#10;  real_server 192.168.10.120 6379 &#123;&#10;    weight 1&#10;    TCP_CHECK &#123;&#10;      connect_timeout 10&#10;      nb_get_retry 3&#10;      delay_before_retry 3&#10;      connect_port 6379&#10;    &#125;&#10;  &#125;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>启动keepalived<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/etc/init.d/keepalived restart</span><br></pre></td></tr></table></figure></p>
+<p>在Redis服务器上配置针对LVS/DR模式的内核参数配置<br>在/usr/local/bin下创建lvsadm脚本<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash&#10;VIP=192.168.10.150&#10;source /etc/rc.d/init.d/functions&#10;case &#34;$1&#34; in&#10;start)&#10;  echo &#34;start LVS RealServer VIP&#34;&#10;  echo &#34;1&#34; &#62;/proc/sys/net/ipv4/conf/lo/arp_ignore&#10;  echo &#34;2&#34; &#62;/proc/sys/net/ipv4/conf/lo/arp_announce&#10;  echo &#34;1&#34; &#62; /proc/sys/net/ipv4/conf/eth0/arp_ignore&#10;  echo &#34;2&#34; &#62; /proc/sys/net/ipv4/conf/eth0/arp_announce&#10;  echo &#34;1&#34; &#62;/proc/sys/net/ipv4/conf/all/arp_ignore&#10;  echo &#34;2&#34; &#62;/proc/sys/net/ipv4/conf/all/arp_announce&#10;  /sbin/ifconfig lo:0 $VIP broadcast $VIP netmask 255.255.255.255 up&#10;  /sbin/route add -host $VIP dev lo:0&#10;;;&#10;stop)&#10;  /sbin/route del -host $VIP dev lo:0&#10;  /sbin/ifconfig lo:0 down&#10;  echo &#34;close LVS RealServer VIP&#34;&#10;  echo &#34;0&#34; &#62;/proc/sys/net/ipv4/conf/lo/arp_ignore&#10;  echo &#34;0&#34; &#62;/proc/sys/net/ipv4/conf/lo/arp_announce&#10;  echo &#34;0&#34; &#62;/proc/sys/net/ipv4/conf/all/arp_ignore&#10;  echo &#34;0&#34; &#62;/proc/sys/net/ipv4/conf/all/arp_announce&#10;  echo &#34;0&#34; &#62;/proc/sys/net/ipv4/conf/eth0/arp_ignore&#10;  echo &#34;0&#34; &#62;/proc/sys/net/ipv4/conf/eth0/arp_announce&#10;;;&#10;*)&#10;  echo &#34;Usage: $0 &#123;start|stop&#125;&#34;&#10;  exit 1&#10;esac</span><br></pre></td></tr></table></figure></p>
+<p>开启LVS/DR模式<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod +x /usr/<span class="built_in">local</span>/bin/lvsadm</span><br><span class="line">lvsadm start</span><br></pre></td></tr></table></figure></p>
+<p>备注<br>LVS/DR模式要求所有服务器都在一个网段.<br>Redis部署配置略</p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-02-16T03:23:14.000Z"><a href="/2016/02/16/mha部署配置以及使用keepalived做vip漂移/">2016-02-16</a></time>
       
       
@@ -470,6 +512,8 @@
     <li><a href="/tags/ansible/">ansible</a><small>1</small></li>
   
     <li><a href="/tags/keepalived/">keepalived</a><small>1</small></li>
+  
+    <li><a href="/tags/lvs/">lvs</a><small>1</small></li>
   
     <li><a href="/tags/markdown/">markdown</a><small>1</small></li>
   
