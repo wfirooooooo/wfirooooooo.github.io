@@ -60,7 +60,7 @@
     </header>
     <div class="entry">
       
-        <p>lVS/DR配合Keepalived实现服务的高可用和负载均衡的文章已经非常多了,我这里记录一下生产环境的使用情况.<br>以针对Redis从服务提供负载读为例进行说明:</p>
+        <p>LVS/DR配合Keepalived实现服务的高可用和负载均衡的文章已经非常多了,我这里记录一下生产环境的使用情况.<br>以针对Redis从服务提供负载读为例进行说明:</p>
 <p>服务器信息<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lvs/keepalived&#26381;&#21153;&#22120;&#9;&#9;192.168.10.11&#10;lvs/keepalived&#26381;&#21153;&#22120;&#9;&#9;192.168.10.12&#10;redis&#20174;&#26381;&#21153;&#22120;1&#9;&#9;&#9;192.168.10.110&#10;redis&#20174;&#26381;&#21153;&#22120;2&#9;&#9;&#9;192.168.10.120&#10;&#10;vip(&#22312;lvs&#26381;&#21153;&#22120;&#32465;&#23450;)&#9;&#9;192.168.10.150</span><br></pre></td></tr></table></figure></p>
 <p>基本架构图<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10;    192.168.10.150:6379(vip)&#10;           /            \&#10;192.168.10.110:6379       192.168.10.120:6379</span><br></pre></td></tr></table></figure></p>
 <p>基本软件安装<br>keepalived安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y ipvsadm libnl-devel popt-devel keepalived</span><br></pre></td></tr></table></figure></p>
