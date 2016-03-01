@@ -1,0 +1,198 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ansible介绍 | wfir&#39;s tech blog</title>
+  <meta name="author" content="wfir">
+  
+  <meta name="description" content="ansible介绍python实现的自动化部署配置管理平台agentless方式,使用ssh的方式进行连接
+ansible架构
+
+ansible安装yum源安装:    yum install -y ansible (添加epel源)pip安装:    pip install ansible(先安装">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="ansible介绍"/>
+  <meta property="og:site_name" content="wfir&#39;s tech blog"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="wfir&#39;s tech blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">wfir&#39;s tech blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2016-03-01T09:34:44.000Z"><a href="/2016/03/01/ansible介绍/">2016-03-01</a></time>
+      
+      
+  
+    <h1 class="title">ansible介绍</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>ansible介绍<br>python实现的自动化部署配置管理平台<br>agentless方式,使用ssh的方式进行连接</p>
+<p>ansible架构</p>
+<p><img src="/images/ansible-arch.jpg" alt=""></p>
+<p>ansible安装<br>yum源安装:    yum install -y ansible (添加epel源)<br>pip安装:    pip install ansible(先安装pip)</p>
+<p>ansible目录结构<br>/etc/ansible<br>├── ansible.cfg<br>├── hosts<br>└── roles<br>ansible.cfg    ansible配置文件<br>hosts        填写的主机列表文件<br>roles        存放自定义角色的文件夹</p>
+<p>ansible命令介绍<br>安装后直接执行ansible即可,ansible命令常用参数如下:<br>ansible <host-pattern> [options]</host-pattern></p>
+<p><host-pattern>    填写hosts文件中定义的服务器名称或服务器组名称<br>[options]<br>-a MODULE_ARGS, –args=MODULE_ARGS    ansible模块所需的参数信息<br>-C, –check    不进行实际的操作,只是尝试查看可能的操作<br>-e EXTRA_VARS, –extra-vars=EXTRA_VARS    添加额外的变量值<br>-h, –help    帮助信息<br>–list-hosts    列出服务器列表<br>-m MODULE_NAME, –module-name=MODULE_NAME    ansible要执行模块的名称<br> -u REMOTE_USER, –user=REMOTE_USER    远程连接所用的用户<br>-v, –verbose    长信息,-vvv显示更多的信息,-vvvv显示调试信息<br>–version    显示ansible版本</host-pattern></p>
+<p>ansible执行示例<br>ansible zookeeper -m ping<br>ansible zookeeper -m shell -a “date”</p>
+<p>ansible-playbooks<br>通过ansible-playbooks可以把一系列的部署配置工作集成到一起操作,减少脚本的编写过程<br>以zookeeper-cluster为例介绍<br>目录结构<br>zookeeper-cluster<br>├── files<br>│   └── zookeeper-3.4.6.tar.gz<br>├── group_vars<br>│   └── zookeeper_hosts<br>├── hosts<br>├── main.yaml<br>└── roles<br>    └── zookeeper<br>        ├── tasks<br>        │   └── main.yml<br>        └── templates<br>            ├── myid.j2<br>            └── zoo.cfg.j2<br>files文件夹    存放执行过程中需要的文件,比如zookeeper安装包<br>group_vars文件夹    存放执行过程中需要填写的变量值文件<br>hosts文件    安装zookeeper的主机列表<br>main.yaml    执行命令组合文件<br>roles文件夹    角色列表,与main.yaml中的配置对应</p>
+<p>ansible-playbook命令常用参数<br>ansible-playbook playbook.yml<br>Options:<br>-C, –check    不进行实际的操作,只是尝试查看可能的操作<br>-e EXTRA_VARS, –extra-vars=EXTRA_VARS    添加额外的变量值<br>-h, –help    查看帮助<br>-i INVENTORY, –inventory-file=INVENTORY    指定hosts文件,默认是/etc/ansible/hosts<br>–syntax-check    执行语法检查<br>-t TAGS, –tags=TAGS    只执行指定tag值得操作<br> -u REMOTE_USER, –user=REMOTE_USER    远程连接所用的用户<br>-v, –verbose    长信息,-vvv显示更多的信息,-vvvv显示调试信息<br>–version    显示ansible版本</p>
+<p>ansible-playbook执行示例<br>ansible-playbook -i hosts main.yaml</p>
+<p>ansible常用模块介绍<br>查看ansible内置模块<br>ansible-doc -l    模块列表<br>ansible-doc -s 模块名称    模块帮助信息<br>ping:    测试远程主机是否运行<br>file:    设置远程文件的属性<br>copy:    复制文件或文件夹到远程主机<br>shell:    远程执行shell命令<br>command:    与shell类似<br>service:    管理远程主机服务<br>yum:    远程yum安装软件包<br>user:    用户管理<br>group:    用户组管理<br>script:    远程执行指定脚本<br>unarchive:    解压文件并放到指定目录<br>template:    复制模板文件到远程主机<br>delegate_to:    同时执行相关主机组<br>with_items:    变量和值</p>
+<p>参考资料<br><a href="http://docs.ansible.com/ansible/" target="_blank" rel="external">http://docs.ansible.com/ansible/</a><br><a href="http://www.178linux.com/doc/ansible/index.html" target="_blank" rel="external">http://www.178linux.com/doc/ansible/index.html</a><br><a href="http://xiaorui.cc/category/ansible/" target="_blank" rel="external">http://xiaorui.cc/category/ansible/</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/ansible/">ansible</a>
+  </div>
+
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">留言</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/03/01/ansible介绍/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜尋">
+    <input type="hidden" name="q" value="site:wfirooooooo.github.io">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">標籤</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/ansible/">ansible</a><small>2</small></li>
+  
+    <li><a href="/tags/keepalived/">keepalived</a><small>1</small></li>
+  
+    <li><a href="/tags/lvs/">lvs</a><small>1</small></li>
+  
+    <li><a href="/tags/markdown/">markdown</a><small>1</small></li>
+  
+    <li><a href="/tags/mha/">mha</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>1</small></li>
+  
+    <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
+  
+    <li><a href="/tags/tomcat/">tomcat</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2016 wfir
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
