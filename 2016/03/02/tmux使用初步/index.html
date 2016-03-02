@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>tmux使用初步 | wfir&#39;s tech blog</title>
+  <meta name="author" content="wfir">
+  
+  <meta name="description" content="tmux是一款终端使用工具,可以保持ssh操作状态.下面简单说说怎么用.
+安装1234# fedora 22sudo dnf install -y tmux#macbrew install tmux
+启动tmux,并给session命名12#创建一个叫test的sessiontmux new -s ">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="tmux使用初步"/>
+  <meta property="og:site_name" content="wfir&#39;s tech blog"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="wfir&#39;s tech blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">wfir&#39;s tech blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2016-03-02T07:23:13.000Z"><a href="/2016/03/02/tmux使用初步/">2016-03-02</a></time>
+      
+      
+  
+    <h1 class="title">tmux使用初步</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>tmux是一款终端使用工具,可以保持ssh操作状态.<br>下面简单说说怎么用.</p>
+<p>安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># fedora 22</span></span><br><span class="line">sudo dnf install -y tmux</span><br><span class="line"><span class="comment">#mac</span></span><br><span class="line">brew install tmux</span><br></pre></td></tr></table></figure></p>
+<p>启动tmux,并给session命名<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建一个叫test的session</span></span><br><span class="line">tmux new <span class="operator">-s</span> <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
+<p>查看tmux seesion<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux ls</span><br></pre></td></tr></table></figure></p>
+<p>进入session<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux attach -t <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
+<p>tmux通过快捷键实现终端操作,快捷键前缀是Ctrl+b,其他操作在快捷键前缀后操作<br>(常用按键如下)[<a href="http://mingxinglai.com/cn/2012/09/tmux/" target="_blank" rel="external">http://mingxinglai.com/cn/2012/09/tmux/</a>]</p>
+<ul>
+<li>C-b ? 显示快捷键帮助</li>
+<li>C-b C-o 调换窗口位置，类似与vim 里的C-w</li>
+<li>C-b 空格键 采用下一个内置布局</li>
+<li>C-b ! 把当前窗口变为新窗口</li>
+<li>C-b “ 横向分隔窗口</li>
+<li>C-b % 纵向分隔窗口</li>
+<li>C-b q 显示分隔窗口的编号</li>
+<li>C-b o 跳到下一个分隔窗口</li>
+<li>C-b 上下键 上一个及下一个分隔窗口</li>
+<li>C-b C-方向键 调整分隔窗口大小</li>
+<li>C-b c 创建新窗口</li>
+<li>C-b 0~9 选择几号窗口</li>
+<li>C-b c 创建新窗口</li>
+<li>C-b n 选择下一个窗口</li>
+<li>C-b l 切换到最后使用的窗口</li>
+<li>C-b p 选择前一个窗口</li>
+<li>C-b w 以菜单方式显示及选择窗口</li>
+<li>C-b t 显示时钟</li>
+<li>C-b ; 切换到最后一个使用的面板</li>
+<li>C-b x 关闭面板</li>
+<li>C-b &amp; 关闭窗口</li>
+<li>C-b s 以菜单方式显示和选择会话</li>
+<li>C-b d 退出tumx，并保存当前会话，这时，tmux仍在后台运行，可以通过tmux attach进入 到指定的会话</li>
+</ul>
+<p>tmux也有配置文件,在~/.tmux.conf(没有需要创建)<br>可以添加个性化配置项,暂时没需求.</p>
+<p>参考站点<br><a href="http://mingxinglai.com/cn/2012/09/tmux/" target="_blank" rel="external">http://mingxinglai.com/cn/2012/09/tmux/</a><br><a href="http://blog.chh.tw/posts/tmux-terminal-multiplexer/" target="_blank" rel="external">http://blog.chh.tw/posts/tmux-terminal-multiplexer/</a><br><a href="https://blog.longwin.com.tw/2011/04/tmux-learn-screen-config-2011/" target="_blank" rel="external">https://blog.longwin.com.tw/2011/04/tmux-learn-screen-config-2011/</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/tmux/">tmux</a>
+  </div>
+
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">留言</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/03/02/tmux使用初步/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜尋">
+    <input type="hidden" name="q" value="site:wfirooooooo.github.io">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">標籤</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/ansible/">ansible</a><small>2</small></li>
+  
+    <li><a href="/tags/keepalived/">keepalived</a><small>1</small></li>
+  
+    <li><a href="/tags/lvs/">lvs</a><small>1</small></li>
+  
+    <li><a href="/tags/markdown/">markdown</a><small>1</small></li>
+  
+    <li><a href="/tags/mha/">mha</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>1</small></li>
+  
+    <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
+  
+    <li><a href="/tags/tmux/">tmux</a><small>1</small></li>
+  
+    <li><a href="/tags/tomcat/">tomcat</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2016 wfir
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
