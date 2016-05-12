@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>tmux使用初步 | wfir&#39;s tech blog</title>
+  <title>Redis-Dump部署 | wfir&#39;s tech blog</title>
   <meta name="author" content="wfir">
   
-  <meta name="description" content="tmux是一款终端使用工具,可以保持ssh操作状态.下面简单说说怎么用.
-安装1234# fedora 22sudo dnf install -y tmux#macbrew install tmux
-启动tmux,并给session命名12#创建一个叫test的sessiontmux new -s ">
+  <meta name="description" content="Redis-Dump是一个导出Redis数据为JSON格式的工具,使用Ruby开发.Redis-Dump能够实现对指定数据库的导入导出操作,本文就介绍一下它的安装方法
+操作系统    CentOS 6.x
+安装RVM12gpg --keyserver hkp://keys.gnupg.net --r">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="tmux使用初步"/>
+  <meta property="og:title" content="Redis-Dump部署"/>
   <meta property="og:site_name" content="wfir&#39;s tech blog"/>
 
   
@@ -53,49 +53,27 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2016-03-02T07:23:13.000Z"><a href="/2016/03/02/tmux使用初步/">2016-03-02</a></time>
+        <time datetime="2016-05-12T08:36:23.000Z"><a href="/2016/05/12/Redis-Dump部署/">2016-05-12</a></time>
       
       
   
-    <h1 class="title">tmux使用初步</h1>
+    <h1 class="title">Redis-Dump部署</h1>
   
 
     </header>
     <div class="entry">
       
-        <p>tmux是一款终端使用工具,可以保持ssh操作状态.<br>下面简单说说怎么用.</p>
-<p>安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># fedora 22</span></span><br><span class="line">sudo dnf install -y tmux</span><br><span class="line"><span class="comment">#mac</span></span><br><span class="line">brew install tmux</span><br></pre></td></tr></table></figure></p>
-<p>启动tmux,并给session命名<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建一个叫test的session</span></span><br><span class="line">tmux new <span class="operator">-s</span> <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
-<p>查看tmux seesion<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux ls</span><br></pre></td></tr></table></figure></p>
-<p>进入session<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux attach -t <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
-<p>tmux通过快捷键实现终端操作,快捷键前缀是Ctrl+b,其他操作在快捷键前缀后操作<br>常用按键如下<a href="http://mingxinglai.com/cn/2012/09/tmux/" target="_blank" rel="external">1</a></p>
-<ul>
-<li>C-b ? 显示快捷键帮助</li>
-<li>C-b C-o 调换窗口位置，类似与vim 里的C-w</li>
-<li>C-b 空格键 采用下一个内置布局</li>
-<li>C-b ! 把当前窗口变为新窗口</li>
-<li>C-b “ 横向分隔窗口</li>
-<li>C-b % 纵向分隔窗口</li>
-<li>C-b q 显示分隔窗口的编号</li>
-<li>C-b o 跳到下一个分隔窗口</li>
-<li>C-b 上下键 上一个及下一个分隔窗口</li>
-<li>C-b C-方向键 调整分隔窗口大小</li>
-<li>C-b c 创建新窗口</li>
-<li>C-b 0~9 选择几号窗口</li>
-<li>C-b c 创建新窗口</li>
-<li>C-b n 选择下一个窗口</li>
-<li>C-b l 切换到最后使用的窗口</li>
-<li>C-b p 选择前一个窗口</li>
-<li>C-b w 以菜单方式显示及选择窗口</li>
-<li>C-b t 显示时钟</li>
-<li>C-b ; 切换到最后一个使用的面板</li>
-<li>C-b x 关闭面板</li>
-<li>C-b &amp; 关闭窗口</li>
-<li>C-b s 以菜单方式显示和选择会话</li>
-<li>C-b d 退出tumx，并保存当前会话，这时，tmux仍在后台运行，可以通过tmux attach进入 到指定的会话</li>
-</ul>
-<p>tmux也有配置文件,在~/.tmux.conf(没有需要创建)<br>可以添加个性化配置项,暂时没需求.</p>
-<p>参考站点<br><a href="http://mingxinglai.com/cn/2012/09/tmux/" target="_blank" rel="external">http://mingxinglai.com/cn/2012/09/tmux/</a><br><a href="http://blog.chh.tw/posts/tmux-terminal-multiplexer/" target="_blank" rel="external">http://blog.chh.tw/posts/tmux-terminal-multiplexer/</a><br><a href="https://blog.longwin.com.tw/2011/04/tmux-learn-screen-config-2011/" target="_blank" rel="external">https://blog.longwin.com.tw/2011/04/tmux-learn-screen-config-2011/</a></p>
+        <p>Redis-Dump是一个导出Redis数据为JSON格式的工具,使用Ruby开发.<br>Redis-Dump能够实现对指定数据库的导入导出操作,本文就介绍一下它的安装方法</p>
+<p>操作系统    CentOS 6.x</p>
+<p>安装RVM<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gpg --keyserver hkp://keys.gnupg.net --recv-keys <span class="number">409</span>B6B1796C275462A1703113804BB82D39DC0E3</span><br><span class="line">curl <span class="operator">-s</span>SL https://get.rvm.io | bash <span class="operator">-s</span> stable</span><br></pre></td></tr></table></figure></p>
+<p>生效RVM环境变量<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> /etc/profile.d/rvm.sh</span><br></pre></td></tr></table></figure></p>
+<p>修改RVM源为Ruby China的源<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"ruby_url=https://cache.ruby-china.org/pub/ruby"</span> &gt; /usr/<span class="built_in">local</span>/rvm/user/db</span><br></pre></td></tr></table></figure></p>
+<p>使用RVM安装Ruby<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rvm requirements</span><br><span class="line">rvm install <span class="number">2.3</span>.<span class="number">0</span></span><br></pre></td></tr></table></figure></p>
+<p>设置Ruby版本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rvm use <span class="number">2.3</span>.<span class="number">0</span> --default</span><br></pre></td></tr></table></figure></p>
+<p>安装Redis-Dump<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem install redis-dump</span><br></pre></td></tr></table></figure></p>
+<p><strong>FAQ</strong><br>如果出现gem无法安装的情况,如下:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR:  While executing gem ... (Gem::RemoteFetcher::FetchError)&#10;    SSL_connect SYSCALL returned=5 errno=0 state=SSLv2/v3 read server hello A (https://rubygems.global.ssl.fastly.net/quick/Marshal.4.8/redis-3.3.0.gemspec.rz)</span><br></pre></td></tr></table></figure></p>
+<p>这是由于墙的问题,替换为淘宝的源就好了<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/</span><br></pre></td></tr></table></figure></p>
+<p>参考站点<br><a href="https://ruby-china.org/wiki/install_ruby_guide" target="_blank" rel="external">https://ruby-china.org/wiki/install_ruby_guide</a><br><a href="https://github.com/delano/redis-dump" target="_blank" rel="external">https://github.com/delano/redis-dump</a><br><a href="https://ruby.taobao.org/" target="_blank" rel="external">https://ruby.taobao.org/</a></p>
 <p>have fun !</p>
 
       
@@ -106,7 +84,7 @@
         
   
   <div class="tags">
-    <a href="/tags/tmux/">tmux</a>
+    <a href="/tags/redis/">redis</a>
   </div>
 
         
@@ -149,7 +127,7 @@
   }(document, 'script', 'facebook-jssdk'));
 </script>
 
-<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/03/02/tmux使用初步/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/05/12/Redis-Dump部署/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
       
   
 </section>

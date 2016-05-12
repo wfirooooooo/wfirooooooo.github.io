@@ -50,6 +50,50 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-05-12T08:36:23.000Z"><a href="/2016/05/12/Redis-Dump部署/">2016-05-12</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/05/12/Redis-Dump部署/">Redis-Dump部署</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>Redis-Dump是一个导出Redis数据为JSON格式的工具,使用Ruby开发.<br>Redis-Dump能够实现对指定数据库的导入导出操作,本文就介绍一下它的安装方法</p>
+<p>操作系统    CentOS 6.x</p>
+<p>安装RVM<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gpg --keyserver hkp://keys.gnupg.net --recv-keys <span class="number">409</span>B6B1796C275462A1703113804BB82D39DC0E3</span><br><span class="line">curl <span class="operator">-s</span>SL https://get.rvm.io | bash <span class="operator">-s</span> stable</span><br></pre></td></tr></table></figure></p>
+<p>生效RVM环境变量<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> /etc/profile.d/rvm.sh</span><br></pre></td></tr></table></figure></p>
+<p>修改RVM源为Ruby China的源<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"ruby_url=https://cache.ruby-china.org/pub/ruby"</span> &gt; /usr/<span class="built_in">local</span>/rvm/user/db</span><br></pre></td></tr></table></figure></p>
+<p>使用RVM安装Ruby<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rvm requirements</span><br><span class="line">rvm install <span class="number">2.3</span>.<span class="number">0</span></span><br></pre></td></tr></table></figure></p>
+<p>设置Ruby版本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rvm use <span class="number">2.3</span>.<span class="number">0</span> --default</span><br></pre></td></tr></table></figure></p>
+<p>安装Redis-Dump<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem install redis-dump</span><br></pre></td></tr></table></figure></p>
+<p><strong>FAQ</strong><br>如果出现gem无法安装的情况,如下:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR:  While executing gem ... (Gem::RemoteFetcher::FetchError)&#10;    SSL_connect SYSCALL returned=5 errno=0 state=SSLv2/v3 read server hello A (https://rubygems.global.ssl.fastly.net/quick/Marshal.4.8/redis-3.3.0.gemspec.rz)</span><br></pre></td></tr></table></figure></p>
+<p>这是由于墙的问题,替换为淘宝的源就好了<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/</span><br></pre></td></tr></table></figure></p>
+<p>参考站点<br><a href="https://ruby-china.org/wiki/install_ruby_guide" target="_blank" rel="external">https://ruby-china.org/wiki/install_ruby_guide</a><br><a href="https://github.com/delano/redis-dump" target="_blank" rel="external">https://github.com/delano/redis-dump</a><br><a href="https://ruby.taobao.org/" target="_blank" rel="external">https://ruby.taobao.org/</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-03-21T07:34:05.000Z"><a href="/2016/03/21/使用xtrabackup工具动态增加mysql从库/">2016-03-21</a></time>
       
       
@@ -505,60 +549,6 @@
 
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2016-01-20T02:44:26.000Z"><a href="/2016/01/20/markdown语法小结/">2016-01-20</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2016/01/20/markdown语法小结/">markdown语法小结</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>标题<br>一个井号是一级标题<br>两个井号是二级标题<br>以此类推</p>
-<h1 id="u4E00_u7EA7_u6807_u9898"><a href="#u4E00_u7EA7_u6807_u9898" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="u4E8C_u7EA7_u6807_u9898"><a href="#u4E8C_u7EA7_u6807_u9898" class="headerlink" title="二级标题"></a>二级标题</h2><p>段落<br>以空白行分割段落</p>
-<p>引用<br>右尖括号&gt;跟后面引用内容</p>
-<blockquote>
-<p>这是一个引用内容</p>
-</blockquote>
-<p>列表<br>星号*,加号+和减号-表示无序列表<br>有序列表使用数字加一个英文句点作为项目标记<br>列表可以嵌套列表</p>
-<ol>
-<li>第一段<ul>
-<li>列表1</li>
-<li>列表2</li>
-<li>列表3</li>
-</ul>
-</li>
-<li>第二段</li>
-<li>第三段</li>
-</ol>
-<p>链接<br>中括号包围文字,后面紧跟圆括号包围链接 <a href="/www.google.com">Google</a><br>参考链接的形式,可以在原文为链接定义一个名称,在文章的其他地方定义该链接内容<br>链接名称,语法格式:[链接文本][链接名称]<br>链接内容,语法格式:[链接名称]:空白符 URL “title”</p>
-<p>代码<br>首行用3个反引号和编程语言名称标记代码块开始,代码块结尾用3个反引号闭合代码块<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"hello world"</span></span><br></pre></td></tr></table></figure></p>
-<p>参考链接<br><a href="http://www.cnblogs.com/dezheng/p/3834813.html" target="_blank" rel="external">http://www.cnblogs.com/dezheng/p/3834813.html</a></p>
-<p>sublime text 3 编写markdown内容<br>安装markdown插件<br>Ctrl+Shift+P    安装MarkdownEditing插件<br>tips<br>markdown语法高亮    Ctrl+Shift+P    ssm(set syntax: markdown)<br>在浏览器中查看效果    Ctrl+Shift+P    mp</p>
-<p>参考链接<br><a href="http://www.cnblogs.com/jadeboy/p/4165449.html" target="_blank" rel="external">http://www.cnblogs.com/jadeboy/p/4165449.html</a></p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
 
 <nav id="pagination">
   
@@ -599,6 +589,8 @@
     <li><a href="/tags/nfs/">nfs</a><small>1</small></li>
   
     <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
+  
+    <li><a href="/tags/redis/">redis</a><small>1</small></li>
   
     <li><a href="/tags/tmux/">tmux</a><small>1</small></li>
   
