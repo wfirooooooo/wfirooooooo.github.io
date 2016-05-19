@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Hello World | wfir&#39;s tech blog</title>
+  <title>常用JVM性能调优监控工具示例 | wfir&#39;s tech blog</title>
   <meta name="author" content="wfir">
   
-  <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in ">
+  <meta name="description" content="jps输出JVM中运行的状态信息参数详解-q 不输出类名、Jar名和传入main方法的参数-m 输出传入main方法的参数-l 输出main类或Jar的全限名-v 输出传入JVM的参数示例jps -m -l
+jstack查看Java进程中的线程堆栈信息参数详解-l long listings，会打印">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="Hello World"/>
+  <meta property="og:title" content="常用JVM性能调优监控工具示例"/>
   <meta property="og:site_name" content="wfir&#39;s tech blog"/>
 
   
@@ -51,25 +52,21 @@
     <header>
       
         <div class="icon"></div>
-        <time datetime="2016-01-06T10:29:07.000Z"><a href="/2016/01/06/hello-world/">2016-01-06</a></time>
+        <time datetime="2016-05-19T09:57:14.000Z"><a href="/2016/05/19/常用JVM性能调优监控工具示例/">2016-05-19</a></time>
       
       
   
-    <h1 class="title">Hello World</h1>
+    <h1 class="title">常用JVM性能调优监控工具示例</h1>
   
 
     </header>
     <div class="entry">
       
-        <p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick_Start"><a href="#Quick_Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create_a_new_post"><a href="#Create_a_new_post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run_server"><a href="#Run_server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate_static_files"><a href="#Generate_static_files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy_to_remote_sites"><a href="#Deploy_to_remote_sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+        <p><strong>jps</strong><br>输出JVM中运行的状态信息<br>参数详解<br>-q 不输出类名、Jar名和传入main方法的参数<br>-m 输出传入main方法的参数<br>-l 输出main类或Jar的全限名<br>-v 输出传入JVM的参数<br>示例<br>jps -m -l</p>
+<p><strong>jstack</strong><br>查看Java进程中的线程堆栈信息<br>参数详解<br>-l long listings，会打印出额外的锁信息，在发生死锁时可以用jstack -l pid来观察锁持有情况<br>-m mixed mode，不仅会输出Java堆栈信息，还会输出C/C++堆栈信息（比如Native方法）<br>示例<br>jstack -l PID</p>
+<p><strong>jmap和jhat</strong><br>jmap用于查看堆内存使用情况,一般结合jhat使用<br>参数详解<br>-histo[:live]        打印java对象堆直方图,如果带live参数,只打印存活的对象数量<br>-permstat            打印持久代统计信息<br>-finalizerinfo       打印等待终止对象信息<br>-dump:<dump-options> 输出hprof数据到指定文件<br>-J<flag>             标示运行时系统架构<br>示例<br>jmap -permstat pid    打印进程的类加载器和类加载器加载的持久代对象信息<br>jmap -heap pid    查看进程堆内存使用情况<br>jmap -histo[:live] pid    查看堆内存中的对象数目、大小统计直方图<br>jmap -dump:format=b,file=dumpFileName pid    把进程内存使用情况dump到文件中，再用jhat分析查看<br>jhat -J-mx512m -port 9998 dumpFileName</flag></dump-options></p>
+<p>参考站点<br><a href="http://my.oschina.net/feichexia/blog/196575" target="_blank" rel="external">http://my.oschina.net/feichexia/blog/196575</a><br><a href="http://docs.oracle.com/javase/7/docs/technotes/tools/share/jstack.html" target="_blank" rel="external">http://docs.oracle.com/javase/7/docs/technotes/tools/share/jstack.html</a></p>
+<p>have fun !</p>
 
       
     </div>
@@ -77,6 +74,11 @@
       
         
         
+  
+  <div class="tags">
+    <a href="/tags/java/">java</a>
+  </div>
+
         
   <div class="addthis addthis_toolbox addthis_default_style">
     
@@ -117,7 +119,7 @@
   }(document, 'script', 'facebook-jssdk'));
 </script>
 
-<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/01/06/hello-world/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/05/19/常用JVM性能调优监控工具示例/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
       
   
 </section>
