@@ -1,0 +1,253 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>githug闯关记录 | wfir&#39;s tech blog</title>
+  <meta name="author" content="wfir">
+  
+  <meta name="description" content="1 初始化git仓库git init
+2 配置git账户和邮箱git config –global user.name “wfirooooooo”git config –global user.email “parasiempre@126.com”
+3 添加README文件到暂存区git add R">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="githug闯关记录"/>
+  <meta property="og:site_name" content="wfir&#39;s tech blog"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="wfir&#39;s tech blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">wfir&#39;s tech blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2016-05-24T10:48:20.000Z"><a href="/2016/05/24/githug闯关记录/">2016-05-24</a></time>
+      
+      
+  
+    <h1 class="title">githug闯关记录</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>1 初始化git仓库<br>git init</p>
+<p>2 配置git账户和邮箱<br>git config –global user.name “wfirooooooo”<br>git config –global user.email “parasiempre@126.com”</p>
+<p>3 添加README文件到暂存区<br>git add README</p>
+<p>4 提交README文件<br>git commit -m “add README”</p>
+<p>5 clone一个git仓库<br>git clone <a href="https://github.com/Gazler/cloneme" target="_blank" rel="external">https://github.com/Gazler/cloneme</a></p>
+<p>6 clone一个git仓库到指定文件夹<br>git clone <a href="https://github.com/Gazler/cloneme" target="_blank" rel="external">https://github.com/Gazler/cloneme</a> my_cloned_repo</p>
+<p>7 git仓库忽略.swp文件<br>编辑.gitignore文件,添加以下内容<br>*.swp</p>
+<p>8 git仓库忽略.a后缀的文件,但不包括lib.a<br>编辑.gitignore文件,添加以下内容<br>*.a<br>!lib.a</p>
+<p>9 查找untracked的文件<br>git status</p>
+<p>10 会被提交的文件数量<br>git status<br>备注: 只有前两个文件会被提交<br>untracked - 新增的文件.git不知道他们的存在<br>not staged - 被索引过又被修改的文件<br>staged - 通过git add后即将被提交的文件</p>
+<p>11 从git仓库中删除已经在工作区中删除的文件<br>git status<br>git rm deleteme.rb</p>
+<p>12 删除暂存区中的文件,而不要把文件从文件系统中删除,仅仅在git中删除<br>git status<br>git rm –cached deleteme.rb</p>
+<p>13 保存修改的文件,稍后继续修改,但不提交<br>git stash<br>备注: 恢复文件使用git stash pop</p>
+<p>14 修改oldfile.txt文件名为newfile.txt<br>git mv oldfile.txt newfile.txt</p>
+<p>15 把git仓库中已有的文件重构到新的文件夹中<br>mkdir src<br>git mv *.html src/</p>
+<p>16 查看代码提交日志<br> git log</p>
+<p>17 给commit添加tag<br>git tag new_tag</p>
+<p>18 推送tags到远程仓库<br>git push –tags</p>
+<p>19 commit漏掉的文件,添加到上一次的commit中<br>git add forgotten_file.rb<br>git commit –amend</p>
+<p>20 修改commit日期<br> git commit -m “commit next day” –date “2016-05-25 16:00:00”</p>
+<p>21 使用reset命令把误添加的文件移出来<br>git status<br>git reset to_commit_second.rb<br>git status</p>
+<p>22 撤回最后一次的提交,暂存区的索引不改<br>git reset HEAD~1 –soft</p>
+<p>23 回滚config.rb为最后一次提交的内容<br>git checkout config.rb</p>
+<p>24 把git仓库push到远端仓库<br>git remote</p>
+<p>25 获取远端仓库的url<br>git remote -v</p>
+<p>26 从初始仓库拉取变更<br>git pull origin master</p>
+<p>27 给远端仓库origin添加url<br>git remote add origin <a href="https://github.com/githug/githug" target="_blank" rel="external">https://github.com/githug/githug</a></p>
+<p>28 远端仓库已经重建主分支,提交到主分支并传到远端<br> git rebase origin/master<br>git push</p>
+<p>29 查找commit过文件变化的行<br>git diff</p>
+<p>30 查找文件最后的修改者<br>git blame config.rb</p>
+<p>31 创建分支<br>git branch test_code</p>
+<p>32 切换到新创建的分支<br>git checkout -b my_branch</p>
+<p>33 在指定版本库上修改bug<br>git checkout v1.2</p>
+<p>34 在有同名的tag和branch时,切换到tag需要显式表示(git认为分支的优先级更高)<br>git checkout tags/v1.2</p>
+<p>35 忘记创建分支就提交了,创建一个提交前的分支(不包含最新一次提交的分支)<br>git branch test_branch HEAD~1</p>
+<p>36 创建了过多的分支,删除无用的分支<br>git branch -d delete_me</p>
+<p>37 本地分支提交的变更,不想合并到主分支,却希望分享出去<br>git push origin test_branch</p>
+<p>38 把特性分支的文件合并到主分支<br>git merge feature</p>
+<p>39 远程仓库更新的代码,只是查看,而不要合并到本地<br>git fetch origin</p>
+<p>40 把feature分支rebase到master分支<br>git rebase master feature</p>
+<p>41 优化仓库<br>git repack -d</p>
+<p>42 删除特性分支,保留有用的commit内容<br>git log new-feature -p README.md<br>找到需要合并到主分支commit的hash值<br>git cherry-pick ca32a6dac7b6f97975edbe19a4296c2ee7682f68</p>
+<p>43 deadline将至,查看有哪些TODO工作<br>git grep “TODO”</p>
+<p>44 修改拼写错误的信息<br>git log –oneline<br>根据查询结果确定错误<br>git rebase -i HEAD~2<br>pick改为r<br>修改coommit为正确拼写<br>报错退出</p>
+<p>45 合并多次提交为一次提交,在推送到远端仓库之前操作<br> git log –oneline<br>合并后3个到第二个commit<br>git rebase -i HEAD~4<br>2,3,4行的pick改为s<br>保存退出</p>
+<p>46 合并特性分支时,所有提交合并为一个commit<br>git log long-feature-branch –oneline<br>git merge long-feature-branch –squash<br>git commit -m “merge long-feature-branch”</p>
+<p>47 修改提交的顺序<br>git log –oneline 查看提交错误的顺序<br>git rebase -i HEAD~2    编辑互换错误的顺序</p>
+<p>48 查找哪次commit提交了bug<br>git log –oneline 获得第一次提交的hash值<br>git bisect start HEAD f608824 开始调试<br>git bisect run make test    发现bug commit</p>
+<p>49 修改了一个文件,此文件属于两个特性分支,只提交到第一个特性分支<br>git add feature.rb -p 手动编辑文件,删除其他feature内容<br>git status 查看状态</p>
+<p>50 修改其他问题后,忘记先前工作的分支,如何找回这个分支<br>git reflog 查看先前工作得分支<br>git checkout solve_world_hunger</p>
+<p>51 回滚某次提交<br>git log –oneline    找到需要回滚的提交hash<br>git revert 6c7a0a5</p>
+<p>52 恢复删除的commit<br>git reflog    找到需要恢复的commit hash值<br>git cherry-pick bfd5f91</p>
+<p>53 合并分支到主分支之前,需要修复错误和冲突<br>git merge mybranch 确定冲突文件<br>vim poem.txt    修改冲突文件,删除标识冲突的行<br>git add<br>git commit</p>
+<p>54 想把一个远程仓库导入到工程文件夹中<br>git submodule add <a href="https://github.com/jackmaney/githug-include-me" target="_blank" rel="external">https://github.com/jackmaney/githug-include-me</a></p>
+<p>参考站点<br><a href="https://codingstyle.cn/topics/181" target="_blank" rel="external">https://codingstyle.cn/topics/181</a><br><a href="http://fancyoung.com/blog/githug-cheat-sheet/" target="_blank" rel="external">http://fancyoung.com/blog/githug-cheat-sheet/</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/git/">git</a>
+  </div>
+
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">留言</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/05/24/githug闯关记录/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜尋">
+    <input type="hidden" name="q" value="site:wfirooooooo.github.io">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">標籤</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/activemq/">activemq</a><small>1</small></li>
+  
+    <li><a href="/tags/ansible/">ansible</a><small>2</small></li>
+  
+    <li><a href="/tags/docker/">docker</a><small>1</small></li>
+  
+    <li><a href="/tags/git/">git</a><small>1</small></li>
+  
+    <li><a href="/tags/java/">java</a><small>1</small></li>
+  
+    <li><a href="/tags/keepalived/">keepalived</a><small>1</small></li>
+  
+    <li><a href="/tags/lvs/">lvs</a><small>1</small></li>
+  
+    <li><a href="/tags/markdown/">markdown</a><small>1</small></li>
+  
+    <li><a href="/tags/mha/">mha</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>3</small></li>
+  
+    <li><a href="/tags/nfs/">nfs</a><small>1</small></li>
+  
+    <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
+  
+    <li><a href="/tags/redis/">redis</a><small>1</small></li>
+  
+    <li><a href="/tags/tmux/">tmux</a><small>1</small></li>
+  
+    <li><a href="/tags/tomcat/">tomcat</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2016 wfir
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
