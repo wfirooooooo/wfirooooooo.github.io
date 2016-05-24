@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ActiveMQ高可用架构配置优化 | wfir&#39;s tech blog</title>
+  <meta name="author" content="wfir">
+  
+  <meta name="description" content="ActiveMQ是基于JAVA开发的一款开源消息队列软件.本文所述ActiveMQ架构为基于zookeeper实现高可用,基于LevelDB实现消息队列数据的持久化.
+JDK安装,Zookeeper集群安装,ActiveMQ安装请参考其他文档,本文略.
+ActiveMQ配置优化
+#1 调整默认的JV">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="ActiveMQ高可用架构配置优化"/>
+  <meta property="og:site_name" content="wfir&#39;s tech blog"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="wfir&#39;s tech blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">wfir&#39;s tech blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2016-05-24T02:58:44.000Z"><a href="/2016/05/24/ActiveMQ高可用架构配置优化/">2016-05-24</a></time>
+      
+      
+  
+    <h1 class="title">ActiveMQ高可用架构配置优化</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>ActiveMQ是基于JAVA开发的一款开源消息队列软件.本文所述ActiveMQ架构为基于zookeeper实现高可用,基于LevelDB实现消息队列数据的持久化.</p>
+<p>JDK安装,Zookeeper集群安装,ActiveMQ安装请参考其他文档,本文略.</p>
+<p><strong>ActiveMQ配置优化</strong></p>
+<p>#1 调整默认的JVM内存#<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#20462;&#25913;$activemq_home/bin/env&#10;&#40664;&#35748;&#20869;&#23481;&#10;ACTIVEMQ_OPTS_MEMORY=&#34;-Xms64M -Xmx1G&#34;&#10;&#20462;&#25913;&#20869;&#23481;(&#26681;&#25454;&#23454;&#38469;&#26381;&#21153;&#37197;&#32622;&#36827;&#34892;&#20462;&#25913;)&#10;ACTIVEMQ_OPTS_MEMORY=&#34;-Xms4G -Xmx8G&#34;</span><br></pre></td></tr></table></figure></p>
+<p>#2 调整activemq.xml文件#</p>
+<p>##2.1 流量控制,不同队列分配不同内存使用上限,避免使用全局变量导致一个队列出现问题,影响其他队列运行.##<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#31034;&#20363;:&#10;&#60;policyEntry queue=&#34;*.VirtualTopic.Process.Result&#34; producerFlowControl=&#34;true&#34; memoryLimit=&#34;200mb&#34;/&#62;&#10;&#60;policyEntry queue=&#34;*.VirtualTopic.Process.Other&#34; producerFlowControl=&#34;true&#34; memoryLimit=&#34;20mb&#34;/&#62;</span><br></pre></td></tr></table></figure></p>
+<p>##2.2 systemUsage配置超时时间,单位为毫秒##<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;systemUsage&#62;&#10; &#60;systemUsage sendFailIfNoSpaceAfterTimeout=&#34;3000&#34;&#62;&#10;   &#60;memoryUsage&#62;&#10;     &#60;memoryUsage percentOfJvmHeap=&#34;70&#34; /&#62;&#10;   &#60;/memoryUsage&#62;&#10; &#60;/systemUsage&#62;&#10;&#60;/systemUsage&#62;</span><br></pre></td></tr></table></figure></p>
+<p>##2.3 如果没有持久化需求,可以在broker中设置非持久化参数,提高性能##<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;broker persistent=&#34;false&#34;&#62;&#10;&#60;/broker&#62;</span><br></pre></td></tr></table></figure></p>
+<p>#3 应用侧配置优化#</p>
+<p>##3.1 设置TCP协议传输的socketBufferSize##<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socketBufferSize&#35745;&#31639;&#20844;&#24335;buffer_size = bandwidth * RTT&#10;&#31034;&#20363;: &#10;tcp://IP:61616?socketBufferSize=1500000(140K&#24038;&#21491;)</span><br></pre></td></tr></table></figure></p>
+<p>##3.2 配置Prefetch limit(消费者连接程序性能优化)##<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#31034;&#20363;:&#10;tcp://localhost:61616?jms.prefetchPolicy.queuePrefetch=1(&#23545;&#20110;&#19968;&#20010;&#38431;&#21015;,&#26377;&#19968;&#32452;&#28040;&#36153;&#32773;&#36830;&#25509;,&#20570;&#36127;&#36733;&#20998;&#25285;,&#20540;&#35774;&#20026;1&#25110;0)&#10;&#31034;&#20363;:&#10;queue = new ActiveMQQueue(&#34;TEST.QUEUE?consumer.prefetchSize=10&#34;);(&#23545;&#20110;&#19968;&#20010;&#38431;&#21015;,&#21482;&#26377;&#21333;&#29420;&#30340;&#28040;&#36153;&#32773;&#36830;&#25509;,&#20540;&#21487;&#20197;&#35774;&#32622;&#30340;&#22823;&#19968;&#20123;)&#10;consumer = session.createConsumer(queue);</span><br></pre></td></tr></table></figure></p>
+<p>##3.3使用async模式##<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#31034;&#20363;:&#10;tcp://localhost:61616?jms.useAsyncSend=true</span><br></pre></td></tr></table></figure></p>
+<p>参考站点<br><a href="http://blogs.sourceallies.com/2014/10/activemq-memory-tuning/" target="_blank" rel="external">http://blogs.sourceallies.com/2014/10/activemq-memory-tuning/</a><br><a href="http://www.mastertheintegration.com/core-apache-projects/activemq/introduction-to-activemq/tuning-activemq-tips.html" target="_blank" rel="external">http://www.mastertheintegration.com/core-apache-projects/activemq/introduction-to-activemq/tuning-activemq-tips.html</a><br><a href="http://blog.christianposta.com/activemq/speeding-up-activemq-persistent-messaging-performance-by-25x/" target="_blank" rel="external">http://blog.christianposta.com/activemq/speeding-up-activemq-persistent-messaging-performance-by-25x/</a><br><a href="http://www.cnblogs.com/bornteam/p/4462662.html" target="_blank" rel="external">http://www.cnblogs.com/bornteam/p/4462662.html</a><br><a href="http://manzuosteve.blog.51cto.com/1966239/1192190" target="_blank" rel="external">http://manzuosteve.blog.51cto.com/1966239/1192190</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/activemq/">activemq</a>
+  </div>
+
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">留言</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/05/24/ActiveMQ高可用架构配置优化/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜尋">
+    <input type="hidden" name="q" value="site:wfirooooooo.github.io">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">標籤</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/activemq/">activemq</a><small>1</small></li>
+  
+    <li><a href="/tags/ansible/">ansible</a><small>2</small></li>
+  
+    <li><a href="/tags/docker/">docker</a><small>1</small></li>
+  
+    <li><a href="/tags/java/">java</a><small>1</small></li>
+  
+    <li><a href="/tags/keepalived/">keepalived</a><small>1</small></li>
+  
+    <li><a href="/tags/lvs/">lvs</a><small>1</small></li>
+  
+    <li><a href="/tags/markdown/">markdown</a><small>1</small></li>
+  
+    <li><a href="/tags/mha/">mha</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>3</small></li>
+  
+    <li><a href="/tags/nfs/">nfs</a><small>1</small></li>
+  
+    <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
+  
+    <li><a href="/tags/redis/">redis</a><small>1</small></li>
+  
+    <li><a href="/tags/tmux/">tmux</a><small>1</small></li>
+  
+    <li><a href="/tags/tomcat/">tomcat</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2016 wfir
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
