@@ -50,6 +50,49 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-05-30T01:57:09.000Z"><a href="/2016/05/30/使用expect实现交互批量执行指令/">2016-05-30</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/05/30/使用expect实现交互批量执行指令/">使用expect实现交互批量执行指令</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>使用expect实现交互执行shell命令</p>
+<p>1 安装expect<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y expect</span><br></pre></td></tr></table></figure></p>
+<p>2 expect.sh实现交互输入账户密码和需要执行的指令(以root账户为例)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/expect -f</span></span><br><span class="line"><span class="built_in">set</span> ip [lindex <span class="variable">$argv</span> <span class="number">0</span>]</span><br><span class="line"><span class="built_in">set</span> password [lindex <span class="variable">$argv</span> <span class="number">1</span>]</span><br><span class="line">spawn ssh root@<span class="variable">$ip</span></span><br><span class="line"><span class="built_in">set</span> timeout <span class="number">5</span></span><br><span class="line">expect <span class="string">"*yes/no)?"</span> &#123;send <span class="string">"yes\n"</span>&#125;</span><br><span class="line"><span class="built_in">set</span> timeout <span class="number">5</span></span><br><span class="line">expect <span class="string">"*assword:"</span> &#123;send <span class="string">"<span class="variable">$password</span>\n"</span>&#125;</span><br><span class="line"><span class="built_in">set</span> timeout <span class="number">5</span></span><br><span class="line">expect <span class="string">"#"</span></span><br><span class="line">send <span class="string">"ls\r"</span>    <span class="comment">#此处修改为实际需要的命令</span></span><br><span class="line"><span class="built_in">set</span> timeout <span class="number">5</span></span><br><span class="line">expect <span class="string">"#"</span></span><br><span class="line">send <span class="string">"exit\r"</span></span><br><span class="line">expect eof</span><br></pre></td></tr></table></figure></p>
+<p>3 执行<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod +x expect.sh</span><br><span class="line">./expect.sh ip password</span><br></pre></td></tr></table></figure></p>
+<p>如果想多台服务器批量执行,可以把expect.sh嵌入到shell脚本中,做调用.</p>
+<p>1 制作ip列表文件<br>ip.txt文件格式<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip1:&#23494;&#30721;1&#10;ip2:&#23494;&#30721;2</span><br></pre></td></tr></table></figure></p>
+<p>2 编写批量执行脚本list.sh<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="shebang">#!/bin/bash</span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line</span><br><span class="line"><span class="keyword">do</span> </span><br><span class="line">  ./expect.sh ` <span class="built_in">echo</span> <span class="variable">$line</span> | cut <span class="operator">-d</span><span class="string">":"</span> <span class="operator">-f</span>1` `<span class="built_in">echo</span> <span class="variable">$line</span> | cut <span class="operator">-d</span><span class="string">":"</span> <span class="operator">-f</span>2`</span><br><span class="line"><span class="keyword">done</span>&lt; ip.txt</span><br></pre></td></tr></table></figure></p>
+<p>3 执行<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod +x list.sh</span><br><span class="line">./list.sh</span><br></pre></td></tr></table></figure></p>
+<p>PS1: Python提供了一个pexpect库,实现相同的功能,具体实现可参阅参考站点连接<br>PS2: Python实现的Fabric功能更强大.<br>PS3: 一般我都是使用Ansible实现批量的自动化任务,Ansible 2.1发布了,开始支持网络设备的操作.</p>
+<p>参考站点:<br><a href="http://blog.csdn.net/jaymade/article/details/7896847" target="_blank" rel="external">http://blog.csdn.net/jaymade/article/details/7896847</a><br><a href="https://segmentfault.com/q/1010000000133782" target="_blank" rel="external">https://segmentfault.com/q/1010000000133782</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-05-24T10:48:20.000Z"><a href="/2016/05/24/githug闯关记录/">2016-05-24</a></time>
       
       
@@ -498,52 +541,6 @@
 
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2016-03-01T09:34:44.000Z"><a href="/2016/03/01/Ansible介绍/">2016-03-01</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2016/03/01/Ansible介绍/">Ansible介绍</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>ansible介绍<br>python实现的自动化部署配置管理平台<br>agentless方式,使用ssh的方式进行连接</p>
-<p>ansible架构</p>
-<p><img src="/images/ansible-arch.jpg" alt=""></p>
-<p>ansible安装<br>yum源安装:    yum install -y ansible (添加epel源)<br>pip安装:    pip install ansible(先安装pip)</p>
-<p>ansible目录结构<br>/etc/ansible<br>├── ansible.cfg<br>├── hosts<br>└── roles<br>ansible.cfg    ansible配置文件<br>hosts        填写的主机列表文件<br>roles        存放自定义角色的文件夹</p>
-<p>ansible命令介绍<br>安装后直接执行ansible即可,ansible命令常用参数如下:<br>ansible <host-pattern> [options]</host-pattern></p>
-<p><host-pattern>    填写hosts文件中定义的服务器名称或服务器组名称<br>[options]<br>-a MODULE_ARGS, –args=MODULE_ARGS    ansible模块所需的参数信息<br>-C, –check    不进行实际的操作,只是尝试查看可能的操作<br>-e EXTRA_VARS, –extra-vars=EXTRA_VARS    添加额外的变量值<br>-h, –help    帮助信息<br>–list-hosts    列出服务器列表<br>-m MODULE_NAME, –module-name=MODULE_NAME    ansible要执行模块的名称<br> -u REMOTE_USER, –user=REMOTE_USER    远程连接所用的用户<br>-v, –verbose    长信息,-vvv显示更多的信息,-vvvv显示调试信息<br>–version    显示ansible版本</host-pattern></p>
-<p>ansible执行示例<br>ansible zookeeper -m ping<br>ansible zookeeper -m shell -a “date”</p>
-<p>ansible-playbooks<br>通过ansible-playbooks可以把一系列的部署配置工作集成到一起操作,减少脚本的编写过程<br>以zookeeper-cluster为例介绍<br>目录结构<br>zookeeper-cluster<br>├── files<br>│   └── zookeeper-3.4.6.tar.gz<br>├── group_vars<br>│   └── zookeeper_hosts<br>├── hosts<br>├── main.yaml<br>└── roles<br>    └── zookeeper<br>        ├── tasks<br>        │   └── main.yml<br>        └── templates<br>            ├── myid.j2<br>            └── zoo.cfg.j2<br>files文件夹    存放执行过程中需要的文件,比如zookeeper安装包<br>group_vars文件夹    存放执行过程中需要填写的变量值文件<br>hosts文件    安装zookeeper的主机列表<br>main.yaml    执行命令组合文件<br>roles文件夹    角色列表,与main.yaml中的配置对应</p>
-<p>ansible-playbook命令常用参数<br>ansible-playbook playbook.yml<br>Options:<br>-C, –check    不进行实际的操作,只是尝试查看可能的操作<br>-e EXTRA_VARS, –extra-vars=EXTRA_VARS    添加额外的变量值<br>-h, –help    查看帮助<br>-i INVENTORY, –inventory-file=INVENTORY    指定hosts文件,默认是/etc/ansible/hosts<br>–syntax-check    执行语法检查<br>-t TAGS, –tags=TAGS    只执行指定tag值得操作<br> -u REMOTE_USER, –user=REMOTE_USER    远程连接所用的用户<br>-v, –verbose    长信息,-vvv显示更多的信息,-vvvv显示调试信息<br>–version    显示ansible版本</p>
-<p>ansible-playbook执行示例<br>ansible-playbook -i hosts main.yaml</p>
-<p>ansible常用模块介绍<br>查看ansible内置模块<br>ansible-doc -l    模块列表<br>ansible-doc -s 模块名称    模块帮助信息<br>ping:    测试远程主机是否运行<br>file:    设置远程文件的属性<br>copy:    复制文件或文件夹到远程主机<br>shell:    远程执行shell命令<br>command:    与shell类似<br>service:    管理远程主机服务<br>yum:    远程yum安装软件包<br>user:    用户管理<br>group:    用户组管理<br>script:    远程执行指定脚本<br>unarchive:    解压文件并放到指定目录<br>template:    复制模板文件到远程主机<br>delegate_to:    同时执行相关主机组<br>with_items:    变量和值</p>
-<p>参考资料<br><a href="http://docs.ansible.com/ansible/" target="_blank" rel="external">http://docs.ansible.com/ansible/</a><br><a href="http://www.178linux.com/doc/ansible/index.html" target="_blank" rel="external">http://www.178linux.com/doc/ansible/index.html</a><br><a href="http://xiaorui.cc/category/ansible/" target="_blank" rel="external">http://xiaorui.cc/category/ansible/</a></p>
-<p>have fun !</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
 
 <nav id="pagination">
   
@@ -592,6 +589,8 @@
     <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
   
     <li><a href="/tags/redis/">redis</a><small>1</small></li>
+  
+    <li><a href="/tags/shell/">shell</a><small>1</small></li>
   
     <li><a href="/tags/tmux/">tmux</a><small>1</small></li>
   
