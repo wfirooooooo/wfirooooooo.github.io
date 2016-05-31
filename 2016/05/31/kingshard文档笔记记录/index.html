@@ -82,7 +82,7 @@
 <p>注意:    子表命名格式必须是shard_table_YYYYMM</p>
 <p>按天分表<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">table: test_shard_day&#10;key: ctime&#10;type: date_day&#10;nodes: [node1,node2]&#10;date_range: [20151222-20151224,20160901-20160902]</span><br></pre></td></tr></table></figure></p>
 <p>注意:    子表命名格式必须是shard_table_YYYYMMDD</p>
-<p>管理端命令<br>复用了工作端口,通过特定的关键字来标示,具体操作参考    (管理端命令)[<a href="https://github.com/flike/kingshard/blob/master/doc/KingDoc/admin_command_introduce.md" target="_blank" rel="external">https://github.com/flike/kingshard/blob/master/doc/KingDoc/admin_command_introduce.md</a>]</p>
+<p>管理端命令<br>复用了工作端口,通过特定的关键字来标示,具体操作参考    <a href="https://github.com/flike/kingshard/blob/master/doc/KingDoc/admin_command_introduce.md" target="_blank" rel="external">管理端命令</a></p>
 <p>SQL黑名单功能<br>可在配置中添加SQL黑名单功能<br>blacklist_sql_file: /Users/flike/blacklist<br>在blacklist文件中定义SQL黑名单即可<br>黑名单SQL以正则表达式的形式定义,SQL中的值用?或?+代替.使用前最好手动验证.<br>示例:<br>select count(<em>) from test_shard_hash where id &gt; ?(要严格匹配大于号后面的空格)<br>select count(</em>) from test_shard_range<br>SELECT * FROM WORLD<br>DELETE FROM WORLD</p>
 <p>性能优化网络篇<br>通过go语言的pprof工具查看函数耗时情况<br>下载性能分析封装库profile<br>在main函数中添加cpu监控的启动和停止入口<br>使用sysbench进行压测<br>使用pprof生成pdf报告</p>
 <p>参考站点:<br><a href="https://github.com/flike/kingshard/blob/master/README_ZH.md" target="_blank" rel="external">https://github.com/flike/kingshard/blob/master/README_ZH.md</a></p>
