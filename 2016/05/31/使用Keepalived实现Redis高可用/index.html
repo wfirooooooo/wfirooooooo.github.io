@@ -1,0 +1,211 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>使用Keepalived实现Redis高可用 | wfir&#39;s tech blog</title>
+  <meta name="author" content="wfir">
+  
+  <meta name="description" content="本文通过Keepalived配置和编写Redis切换脚本实现Redis服务的高可用.
+Redis和Keepalived的安装 略
+实验环境如下:1Keepalived/Redis Master     192.168.10.12&amp;#10;Keepalived/Redis Slave      192">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="使用Keepalived实现Redis高可用"/>
+  <meta property="og:site_name" content="wfir&#39;s tech blog"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="wfir&#39;s tech blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">wfir&#39;s tech blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2016-05-31T09:53:20.000Z"><a href="/2016/05/31/使用Keepalived实现Redis高可用/">2016-05-31</a></time>
+      
+      
+  
+    <h1 class="title">使用Keepalived实现Redis高可用</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>本文通过Keepalived配置和编写Redis切换脚本实现Redis服务的高可用.</p>
+<p>Redis和Keepalived的安装 略</p>
+<p>实验环境如下:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Keepalived/Redis Master     192.168.10.12&#10;Keepalived/Redis Slave      192.168.10.13    &#10;VIP                         192.168.10.150</span><br></pre></td></tr></table></figure></p>
+<p>Redis Master(192.168.10.12)上的Keepalived配置/etc/keepalived/keepalived.conf<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">! Configuration File for keepalived&#10;global_defs &#123;&#10;    lvs_id LVS_redis&#10;&#125;&#10;vrrp_script chk_redis &#123;&#10;    script &#34;/etc/keepalived/scripts/redis_check.sh&#34;  &#10;    interval 2                                     &#10;&#125;&#10;vrrp_instance VI_1 &#123;&#10;    state BACKUP&#10;    interface eth1&#10;    virtual_router_id 51&#10;    priority 100&#10;    advert_int 1&#10;    nopreempt&#10;    authentication &#123;&#10;        auth_type PASS&#10;        auth_pass 1111&#10;    &#125;&#10;    track_script &#123;&#10;         chk_redis &#10;    &#125;&#10;    virtual_ipaddress &#123;&#10;        192.168.10.150&#10;    &#125;&#10;        notify_master &#34;/etc/keepalived/scripts/redis.sh -m&#34;&#10;        notify_backup &#34;/etc/keepalived/scripts/redis.sh -s&#34;&#10;        notify_fault  &#34;/etc/keepalived/scripts/redis.sh -s&#34;&#10;        notify_stop  &#34;/etc/keepalived/scripts/redis.sh -s&#34;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>各脚本文件按照实际情况配置:</p>
+<p>**redis_check.sh<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash &#10;REDISCLI=/usr/local/bin/redis-cli&#10;REDISPORT=6379&#10;ALIVE=`$REDISCLI -p $REDISPORT PING` &#10;if [ &#34;$ALIVE&#34; == &#34;PONG&#34; ]; then&#10;echo $ALIVE &#10;exit 0 &#10;else&#10;echo $ALIVE &#10;exit 1 &#10;fi</span><br></pre></td></tr></table></figure></p>
+<p>**redis.sh<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash&#10;#&#10;#Script start Redis and promote to MASTER/SLAVE&#10;#(The MIT License)&#10;#Copyright (C) 2011 Alex Williams&#10;#Modified by wong 2016&#10;#&#10;# Usage Options:&#10;#   -m    promote the redis-server to MASTER&#10;#   -s    promote the redis-server to SLAVE&#10;#   -k    start the redis-server and promote it to MASTER&#10;#&#10;#########################&#10;# User Defined Variables&#10;#########################&#10;REDIS_PEER_IP=&#34;192.168.10.13&#34;                                       # Redis MASTER ip&#10;REDIS_PORT=&#34;6379&#34;                                                   # Redis MASTER port&#10;REDIS_COMMANDS=&#34;/usr/local/bin/redis-cli -p $REDIS_PORT&#34;            # The location of the redis binary&#10;DAEMON=/usr/local/bin/redis-server&#10;DAEMON_ARGS=/etc/redis/$&#123;REDIS_PORT&#125;.conf&#10;##############&#10;# Exit Codes&#10;##############&#10;E_INVALID_ARGS=65&#10;E_INVALID_COMMAND=66&#10;E_NO_SLAVES=67&#10;E_DB_PROBLEM=68&#10;##########################&#10;# Script Functions&#10;##########################&#10;error() &#123;&#10;        E_CODE=$?&#10;        echo &#34;Exiting: ERROR $&#123;E_CODE&#125;: $E_MSG&#34;&#10;        exit $E_CODE&#10;&#125;&#10;start_redis() &#123;&#10;      alive=`$&#123;REDIS_COMMANDS&#125; PING`&#10;      if [ &#34;$alive&#34; != &#34;PONG&#34; ]; then&#10;        $&#123;DAEMON&#125; $&#123;DAEMON_ARGS&#125;&#10;        sleep 1&#10;      fi&#10;&#125;&#10;start_master() &#123;&#10;    $&#123;REDIS_COMMANDS&#125; SLAVEOF $&#123;REDIS_PEER_IP&#125; $&#123;REDIS_PEER_PORT&#125;&#10;    sleep 10&#10;        $&#123;REDIS_COMMANDS&#125; SLAVEOF no one&#10;&#125;&#10;start_slave() &#123;&#10;        $&#123;REDIS_COMMANDS&#125; SLAVEOF $&#123;REDIS_PEER_IP&#125; $&#123;REDIS_PORT&#125;&#10;&#125;&#10;usage() &#123;&#10;        echo  &#34;Start Redis and promote to MASTER/SLAVE  &#34;&#10;        echo  &#34;Options: &#34;&#10;        echo  &#34;-m promote the redis-server to MASTER&#34;&#10;        echo  &#34;-s promote the redis-server to SLAVE&#34;&#10;        echo  &#34;-k start the redis-server and promote it to MASTER&#34;&#10;        echo  &#34;&#34;&#10;        exit $E_INVALID_ARGS&#10;&#125;&#10;for arg in &#34;$@&#34;&#10;do&#10;        case $arg in&#10;        -m) arg_m=true;;&#10;        -s) arg_s=true;;&#10;        -k) arg_k=true;;&#10;        *) usage;;&#10;        esac&#10;done&#10;if [ $arg_m ]; then&#10;        echo  &#34;Promoting redis-server to MASTER&#34;&#10;        start_redis&#10;        wait&#10;        start_master&#10;elif [ $arg_s ]; then&#10;        echo  &#34;Promoting redis-server to SLAVE&#34;&#10;        start_redis&#10;        wait&#10;        start_slave&#10;elif [ $arg_k ]; then&#10;        echo  &#34;Starting redis-server and promoting to MASTER&#34;&#10;        start_redis&#10;        wait&#10;        start_master&#10;else&#10;        usage&#10;fi</span><br></pre></td></tr></table></figure></p>
+<p>Redis Slave(192.168.10.13)上的Keepalived配置/etc/keepalived/keepalived.conf<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">! Configuration File for keepalived&#10;global_defs &#123;&#10;    lvs_id LVS_redis&#10;&#125;&#10;vrrp_script chk_redis &#123;&#10;    script &#34;/etc/keepalived/scripts/redis_check.sh&#34;  &#10;    interval 2                                     &#10;&#125;&#10;vrrp_instance VI_1 &#123;&#10;    state BACKUP&#10;    interface eth1&#10;    virtual_router_id 51&#10;    priority 90&#10;    advert_int 1&#10;    authentication &#123;&#10;        auth_type PASS&#10;        auth_pass 1111&#10;    &#125;&#10;    track_script &#123;&#10;         chk_redis &#10;    &#125;&#10;    virtual_ipaddress &#123;&#10;        192.168.10.150&#10;    &#125;&#10;    notify_master &#34;/etc/keepalived/scripts/redis.sh -m&#34;&#10;    notify_backup &#34;/etc/keepalived/scripts/redis.sh -s&#34;&#10;    notify_fault  &#34;/etc/keepalived/scripts/redis.sh -s&#34;&#10;    notify_stop  &#34;/etc/keepalived/scripts/redis.sh -s&#34;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Redis Slave上的redis_check.sh与Redis Master上的一致,redis.sh不同的地方只有ip</p>
+<p>备注<br>1 由于keepalived两个都设置了backup,并且是非抢占模式,启动keepalived的前提是:<br>(1) 保持redis主从数据一致.<br>2 脚本中redis-cli的指令需要用绝对路径,或者在脚本中加载环境变量,否则脚本无法生效.<br>3 停掉keepalived或redis都会导致vip的漂移.</p>
+<p>参考站点<br><a href="https://aricgardner.com/databases/redis/redis-with-replication-and-failover-keepalived/" target="_blank" rel="external">https://aricgardner.com/databases/redis/redis-with-replication-and-failover-keepalived/</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/redis/">redis</a>
+  </div>
+
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">留言</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/05/31/使用Keepalived实现Redis高可用/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜尋">
+    <input type="hidden" name="q" value="site:wfirooooooo.github.io">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">標籤</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/activemq/">activemq</a><small>1</small></li>
+  
+    <li><a href="/tags/ansible/">ansible</a><small>2</small></li>
+  
+    <li><a href="/tags/docker/">docker</a><small>1</small></li>
+  
+    <li><a href="/tags/git/">git</a><small>1</small></li>
+  
+    <li><a href="/tags/java/">java</a><small>1</small></li>
+  
+    <li><a href="/tags/keepalived/">keepalived</a><small>1</small></li>
+  
+    <li><a href="/tags/lvs/">lvs</a><small>1</small></li>
+  
+    <li><a href="/tags/markdown/">markdown</a><small>1</small></li>
+  
+    <li><a href="/tags/mha/">mha</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>4</small></li>
+  
+    <li><a href="/tags/nfs/">nfs</a><small>1</small></li>
+  
+    <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
+  
+    <li><a href="/tags/redis/">redis</a><small>2</small></li>
+  
+    <li><a href="/tags/shell/">shell</a><small>1</small></li>
+  
+    <li><a href="/tags/tmux/">tmux</a><small>1</small></li>
+  
+    <li><a href="/tags/tomcat/">tomcat</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2016 wfir
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
