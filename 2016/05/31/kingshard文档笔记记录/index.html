@@ -1,0 +1,223 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>kingshard文档笔记记录 | wfir&#39;s tech blog</title>
+  <meta name="author" content="wfir">
+  
+  <meta name="description" content="安装golang配置文件默认读取/etc/ks.yaml,启动的时候可以指定./bin/kingshard -config=etc/ks.yaml配置文件是yaml方式解析,不允许出现tab健,且冒号后跟空格.yaml文件验证网站http://www.yamllint.com/
+分表规则:支持两种分">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="kingshard文档笔记记录"/>
+  <meta property="og:site_name" content="wfir&#39;s tech blog"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="wfir&#39;s tech blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">wfir&#39;s tech blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2016-05-31T03:56:01.000Z"><a href="/2016/05/31/kingshard文档笔记记录/">2016-05-31</a></time>
+      
+      
+  
+    <h1 class="title">kingshard文档笔记记录</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>安装golang<br>配置文件默认读取/etc/ks.yaml,启动的时候可以指定./bin/kingshard -config=etc/ks.yaml<br>配置文件是yaml方式解析,不允许出现tab健,且冒号后跟空格.<br>yaml文件验证网站<a href="http://www.yamllint.com/" target="_blank" rel="external">http://www.yamllint.com/</a></p>
+<p>分表规则:<br>支持两种分表规则: hash和range<br>分表所涉及到的子表,需要手动创建好.格式为: table<em>name</em>%4d<br>未分表的SQL语句将发送到默认节点.</p>
+<p>后台运行kingshard建议使用supervisor工具</p>
+<p>当更新操作涉及到多个node时,kingshard会以非事务的方式执行跨node操作.为了保证数据一致性,请根据实际需求使用非事务方式的跨node更新操作.</p>
+<p>可以指定sql发送的node,需要在sql语句前面加上包含node名称的注释(mysql在连接时需要加上-c选项,避免客户端过滤掉注释)</p>
+<p>强制读主库<br>有时候主库插入数据后,希望立即从主库读出,可以在select语句中加入相应的注释项(/<em>master</em>/),就可以将select语句发送到主库.</p>
+<p>支持跨node的sum和count函数</p>
+<p>支持跨node的order by语句</p>
+<p>支持单node的事务,出现跨node的事务,会返回错误.可以在同node上跨不同子表.</p>
+<p>管理端命令以命令行方式提供,通过关键字标示,格式分两类<br>admin server(opt,k,v) values(action,k1,v1).操作整个kingshard,opt表示操作动作,k表示操作对象,v表示给对象的赋值.<br>admin node(opt,k,v) values(action,nodeName,k1,v1).表示操作node,opt表示操作动作,node表示节点,k表示操作对象,v表示对象赋值.<br>功能介绍: 平滑上下线后端DB,查看修改kingshard配置</p>
+<p>kingshard分表方案采用二级映射的方式:<br>1 可以将表分为多个子表<br>2 将shardkey通过hash或range方式定位到其要操作的记录在哪张子表上<br>3 子表落在哪个node上通过配置文件设置</p>
+<p>sharding支持insert,delete,select,update和replace语句,都支持跨子表.写操作只支持单node上跨子表.select可以跨node,跨子表.</p>
+<p>sharding方式<br>range方式    基于整数范围划分来得到子表下标.基于范围的查询和更新速度快,存在热数据压力落到一张子表的问题.<br>hash方式    采用shardkey%子表个数的方式得到子表下标.请求分布均匀,基于范围的查询和更新,需要请求发送到所有子表,对性能有一定影响.</p>
+<p>子表迁移方案<br>动态迁移子表,保证MySQL节点负载压力不要太大.<br>1 通过自动数据迁移工具<br>2 数据差异小于某一临界值,阻塞老子表写操作<br>3 等待新子表数据同步完毕<br>4 更改kingshard配置中对应子表路由规则<br>5 删除老节点子表</p>
+<p>按时间分表<br>支持的MySQL时间类型<br>date类型:    格式YYYY-MM-DD<br>datetime类型:    格式YYYY-MM-DD HH:MM:SS<br>timestamp类型:    整数类型<br>配置文件示例<br>按年分表<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">table: test_shard_year&#10;key: id&#10;type: date_year&#10;nodes: [node1,node2]&#10;date_range: [2015-2016,2017-2018]</span><br></pre></td></tr></table></figure></p>
+<p>注意:    子表命名格式必须是shard_table_YYYY</p>
+<p>按月分表<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">table: test_shard_month&#10;key: ctime&#10;type: date_month&#10;nodes: [node1,node2]&#10;date_range: [201512-201602,201609-2016010]</span><br></pre></td></tr></table></figure></p>
+<p>注意:    子表命名格式必须是shard_table_YYYYMM</p>
+<p>按天分表<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">table: test_shard_day&#10;key: ctime&#10;type: date_day&#10;nodes: [node1,node2]&#10;date_range: [20151222-20151224,20160901-20160902]</span><br></pre></td></tr></table></figure></p>
+<p>注意:    子表命名格式必须是shard_table_YYYYMMDD</p>
+<p>管理端命令<br>复用了工作端口,通过特定的关键字来标示,具体操作参考    (管理端命令)[<a href="https://github.com/flike/kingshard/blob/master/doc/KingDoc/admin_command_introduce.md" target="_blank" rel="external">https://github.com/flike/kingshard/blob/master/doc/KingDoc/admin_command_introduce.md</a>]</p>
+<p>SQL黑名单功能<br>可在配置中添加SQL黑名单功能<br>blacklist_sql_file: /Users/flike/blacklist<br>在blacklist文件中定义SQL黑名单即可<br>黑名单SQL以正则表达式的形式定义,SQL中的值用?或?+代替.使用前最好手动验证.<br>示例:<br>select count(<em>) from test_shard_hash where id &gt; ?(要严格匹配大于号后面的空格)<br>select count(</em>) from test_shard_range<br>SELECT * FROM WORLD<br>DELETE FROM WORLD</p>
+<p>性能优化网络篇<br>通过go语言的pprof工具查看函数耗时情况<br>下载性能分析封装库profile<br>在main函数中添加cpu监控的启动和停止入口<br>使用sysbench进行压测<br>使用pprof生成pdf报告</p>
+<p>参考站点:<br><a href="https://github.com/flike/kingshard/blob/master/README_ZH.md" target="_blank" rel="external">https://github.com/flike/kingshard/blob/master/README_ZH.md</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/mysql/">mysql</a>
+  </div>
+
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">留言</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/05/31/kingshard文档笔记记录/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜尋">
+    <input type="hidden" name="q" value="site:wfirooooooo.github.io">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">標籤</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/activemq/">activemq</a><small>1</small></li>
+  
+    <li><a href="/tags/ansible/">ansible</a><small>2</small></li>
+  
+    <li><a href="/tags/docker/">docker</a><small>1</small></li>
+  
+    <li><a href="/tags/git/">git</a><small>1</small></li>
+  
+    <li><a href="/tags/java/">java</a><small>1</small></li>
+  
+    <li><a href="/tags/keepalived/">keepalived</a><small>1</small></li>
+  
+    <li><a href="/tags/lvs/">lvs</a><small>1</small></li>
+  
+    <li><a href="/tags/markdown/">markdown</a><small>1</small></li>
+  
+    <li><a href="/tags/mha/">mha</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>4</small></li>
+  
+    <li><a href="/tags/nfs/">nfs</a><small>1</small></li>
+  
+    <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
+  
+    <li><a href="/tags/redis/">redis</a><small>1</small></li>
+  
+    <li><a href="/tags/shell/">shell</a><small>1</small></li>
+  
+    <li><a href="/tags/tmux/">tmux</a><small>1</small></li>
+  
+    <li><a href="/tags/tomcat/">tomcat</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2016 wfir
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

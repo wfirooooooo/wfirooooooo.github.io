@@ -50,6 +50,63 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-05-31T03:56:01.000Z"><a href="/2016/05/31/kingshard文档笔记记录/">2016-05-31</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/05/31/kingshard文档笔记记录/">kingshard文档笔记记录</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>安装golang<br>配置文件默认读取/etc/ks.yaml,启动的时候可以指定./bin/kingshard -config=etc/ks.yaml<br>配置文件是yaml方式解析,不允许出现tab健,且冒号后跟空格.<br>yaml文件验证网站<a href="http://www.yamllint.com/" target="_blank" rel="external">http://www.yamllint.com/</a></p>
+<p>分表规则:<br>支持两种分表规则: hash和range<br>分表所涉及到的子表,需要手动创建好.格式为: table<em>name</em>%4d<br>未分表的SQL语句将发送到默认节点.</p>
+<p>后台运行kingshard建议使用supervisor工具</p>
+<p>当更新操作涉及到多个node时,kingshard会以非事务的方式执行跨node操作.为了保证数据一致性,请根据实际需求使用非事务方式的跨node更新操作.</p>
+<p>可以指定sql发送的node,需要在sql语句前面加上包含node名称的注释(mysql在连接时需要加上-c选项,避免客户端过滤掉注释)</p>
+<p>强制读主库<br>有时候主库插入数据后,希望立即从主库读出,可以在select语句中加入相应的注释项(/<em>master</em>/),就可以将select语句发送到主库.</p>
+<p>支持跨node的sum和count函数</p>
+<p>支持跨node的order by语句</p>
+<p>支持单node的事务,出现跨node的事务,会返回错误.可以在同node上跨不同子表.</p>
+<p>管理端命令以命令行方式提供,通过关键字标示,格式分两类<br>admin server(opt,k,v) values(action,k1,v1).操作整个kingshard,opt表示操作动作,k表示操作对象,v表示给对象的赋值.<br>admin node(opt,k,v) values(action,nodeName,k1,v1).表示操作node,opt表示操作动作,node表示节点,k表示操作对象,v表示对象赋值.<br>功能介绍: 平滑上下线后端DB,查看修改kingshard配置</p>
+<p>kingshard分表方案采用二级映射的方式:<br>1 可以将表分为多个子表<br>2 将shardkey通过hash或range方式定位到其要操作的记录在哪张子表上<br>3 子表落在哪个node上通过配置文件设置</p>
+<p>sharding支持insert,delete,select,update和replace语句,都支持跨子表.写操作只支持单node上跨子表.select可以跨node,跨子表.</p>
+<p>sharding方式<br>range方式    基于整数范围划分来得到子表下标.基于范围的查询和更新速度快,存在热数据压力落到一张子表的问题.<br>hash方式    采用shardkey%子表个数的方式得到子表下标.请求分布均匀,基于范围的查询和更新,需要请求发送到所有子表,对性能有一定影响.</p>
+<p>子表迁移方案<br>动态迁移子表,保证MySQL节点负载压力不要太大.<br>1 通过自动数据迁移工具<br>2 数据差异小于某一临界值,阻塞老子表写操作<br>3 等待新子表数据同步完毕<br>4 更改kingshard配置中对应子表路由规则<br>5 删除老节点子表</p>
+<p>按时间分表<br>支持的MySQL时间类型<br>date类型:    格式YYYY-MM-DD<br>datetime类型:    格式YYYY-MM-DD HH:MM:SS<br>timestamp类型:    整数类型<br>配置文件示例<br>按年分表<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">table: test_shard_year&#10;key: id&#10;type: date_year&#10;nodes: [node1,node2]&#10;date_range: [2015-2016,2017-2018]</span><br></pre></td></tr></table></figure></p>
+<p>注意:    子表命名格式必须是shard_table_YYYY</p>
+<p>按月分表<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">table: test_shard_month&#10;key: ctime&#10;type: date_month&#10;nodes: [node1,node2]&#10;date_range: [201512-201602,201609-2016010]</span><br></pre></td></tr></table></figure></p>
+<p>注意:    子表命名格式必须是shard_table_YYYYMM</p>
+<p>按天分表<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">table: test_shard_day&#10;key: ctime&#10;type: date_day&#10;nodes: [node1,node2]&#10;date_range: [20151222-20151224,20160901-20160902]</span><br></pre></td></tr></table></figure></p>
+<p>注意:    子表命名格式必须是shard_table_YYYYMMDD</p>
+<p>管理端命令<br>复用了工作端口,通过特定的关键字来标示,具体操作参考    (管理端命令)[<a href="https://github.com/flike/kingshard/blob/master/doc/KingDoc/admin_command_introduce.md" target="_blank" rel="external">https://github.com/flike/kingshard/blob/master/doc/KingDoc/admin_command_introduce.md</a>]</p>
+<p>SQL黑名单功能<br>可在配置中添加SQL黑名单功能<br>blacklist_sql_file: /Users/flike/blacklist<br>在blacklist文件中定义SQL黑名单即可<br>黑名单SQL以正则表达式的形式定义,SQL中的值用?或?+代替.使用前最好手动验证.<br>示例:<br>select count(<em>) from test_shard_hash where id &gt; ?(要严格匹配大于号后面的空格)<br>select count(</em>) from test_shard_range<br>SELECT * FROM WORLD<br>DELETE FROM WORLD</p>
+<p>性能优化网络篇<br>通过go语言的pprof工具查看函数耗时情况<br>下载性能分析封装库profile<br>在main函数中添加cpu监控的启动和停止入口<br>使用sysbench进行压测<br>使用pprof生成pdf报告</p>
+<p>参考站点:<br><a href="https://github.com/flike/kingshard/blob/master/README_ZH.md" target="_blank" rel="external">https://github.com/flike/kingshard/blob/master/README_ZH.md</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-05-30T01:57:09.000Z"><a href="/2016/05/30/使用expect实现交互批量执行指令/">2016-05-30</a></time>
       
       
@@ -475,72 +532,6 @@
 
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2016-03-02T07:23:13.000Z"><a href="/2016/03/02/tmux使用初步/">2016-03-02</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2016/03/02/tmux使用初步/">tmux使用初步</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>tmux是一款终端使用工具,可以保持ssh操作状态.<br>下面简单说说怎么用.</p>
-<p>安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># fedora 22</span></span><br><span class="line">sudo dnf install -y tmux</span><br><span class="line"><span class="comment">#mac</span></span><br><span class="line">brew install tmux</span><br></pre></td></tr></table></figure></p>
-<p>启动tmux,并给session命名<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建一个叫test的session</span></span><br><span class="line">tmux new <span class="operator">-s</span> <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
-<p>查看tmux seesion<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux ls</span><br></pre></td></tr></table></figure></p>
-<p>进入session<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux attach -t <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
-<p>tmux通过快捷键实现终端操作,快捷键前缀是Ctrl+b,其他操作在快捷键前缀后操作<br>常用按键如下<a href="http://mingxinglai.com/cn/2012/09/tmux/" target="_blank" rel="external">1</a></p>
-<ul>
-<li>C-b ? 显示快捷键帮助</li>
-<li>C-b C-o 调换窗口位置，类似与vim 里的C-w</li>
-<li>C-b 空格键 采用下一个内置布局</li>
-<li>C-b ! 把当前窗口变为新窗口</li>
-<li>C-b “ 横向分隔窗口</li>
-<li>C-b % 纵向分隔窗口</li>
-<li>C-b q 显示分隔窗口的编号</li>
-<li>C-b o 跳到下一个分隔窗口</li>
-<li>C-b 上下键 上一个及下一个分隔窗口</li>
-<li>C-b C-方向键 调整分隔窗口大小</li>
-<li>C-b c 创建新窗口</li>
-<li>C-b 0~9 选择几号窗口</li>
-<li>C-b c 创建新窗口</li>
-<li>C-b n 选择下一个窗口</li>
-<li>C-b l 切换到最后使用的窗口</li>
-<li>C-b p 选择前一个窗口</li>
-<li>C-b w 以菜单方式显示及选择窗口</li>
-<li>C-b t 显示时钟</li>
-<li>C-b ; 切换到最后一个使用的面板</li>
-<li>C-b x 关闭面板</li>
-<li>C-b &amp; 关闭窗口</li>
-<li>C-b s 以菜单方式显示和选择会话</li>
-<li>C-b d 退出tumx，并保存当前会话，这时，tmux仍在后台运行，可以通过tmux attach进入 到指定的会话</li>
-</ul>
-<p>tmux也有配置文件,在~/.tmux.conf(没有需要创建)<br>可以添加个性化配置项,暂时没需求.</p>
-<p>参考站点<br><a href="http://mingxinglai.com/cn/2012/09/tmux/" target="_blank" rel="external">http://mingxinglai.com/cn/2012/09/tmux/</a><br><a href="http://blog.chh.tw/posts/tmux-terminal-multiplexer/" target="_blank" rel="external">http://blog.chh.tw/posts/tmux-terminal-multiplexer/</a><br><a href="https://blog.longwin.com.tw/2011/04/tmux-learn-screen-config-2011/" target="_blank" rel="external">https://blog.longwin.com.tw/2011/04/tmux-learn-screen-config-2011/</a></p>
-<p>have fun !</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
 
 <nav id="pagination">
   
@@ -582,7 +573,7 @@
   
     <li><a href="/tags/mha/">mha</a><small>1</small></li>
   
-    <li><a href="/tags/mysql/">mysql</a><small>3</small></li>
+    <li><a href="/tags/mysql/">mysql</a><small>4</small></li>
   
     <li><a href="/tags/nfs/">nfs</a><small>1</small></li>
   
