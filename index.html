@@ -50,6 +50,88 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-06-03T06:39:09.000Z"><a href="/2016/06/03/sysbench配置和示例/">2016-06-03</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/06/03/sysbench配置和示例/">sysbench配置和示例</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>sysbench是一款评价操作系统性能的压测工具,主要用于数据库服务的性能压测.<br>本文简单介绍一些它的使用方法.</p>
+<p><strong>压测性能参数</strong></p>
+<ul>
+<li>文件I/O性能</li>
+<li>调度性能</li>
+<li>内存分配和传输速度</li>
+<li>线程执行性能</li>
+<li>数据库服务性能</li>
+</ul>
+<p><strong>安装</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">yum install mysql-devel</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/akopytov/sysbench.git</span><br><span class="line"><span class="built_in">cd</span> sysbench</span><br><span class="line">./autogen.sh</span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure></p>
+<p><strong>使用方法</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysbench [common-options] --test=name [<span class="built_in">test</span>-options] <span class="built_in">command</span></span><br></pre></td></tr></table></figure></p>
+<p><em>command说明</em></p>
+<ul>
+<li>prepare   执行准备动作,为fileio压测准备文件,为db压测准备测试数据</li>
+<li>run          执行实际压测动作</li>
+<li>cleanup   执行完成后清除临时数据</li>
+<li>help      帮助信息</li>
+</ul>
+<p><em>options说明</em></p>
+<ul>
+<li>–num-threads         压测所用工作线程数,默认值1</li>
+<li>–max-requests        请求数上限,0表示不限制,默认值10000</li>
+<li>–max-time            执行时间上限,0表示不限制,默认值0</li>
+<li>–thread-stack-size   每个线程的stack大小,默认值32K</li>
+<li>–init-rng            压测之前是否初始化随机数生成器,默认off</li>
+<li>–report-interval     统计信息显示时间间隔,默认0,不开启</li>
+<li>–test            压测运行的名称,必须值</li>
+<li>–debug           打印debug信息,默认off</li>
+<li>–validate        压测结果确认,默认off</li>
+<li>–help            打印帮助信息,默认off</li>
+<li>–verbosity       信息显示等级,0-critical级信息,5-debug级信息,默认4</li>
+<li>–percentile      sysbench执行时间包括请求的最短时间,平均时间,最长时间.此项可设置采用的请求百分比范围做统计,默认95</li>
+</ul>
+<p><strong>示例</strong></p>
+<ul>
+<li><p>cpu测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#单线程</span></span><br><span class="line">sysbench --test=cpu --num-threads=<span class="number">1</span> --cpu-max-prime=<span class="number">5000</span> run</span><br><span class="line"><span class="comment">#多线程</span></span><br><span class="line">sysbench --test=cpu --num-threads=<span class="number">4</span> --cpu-max-prime=<span class="number">20000</span> run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>内存测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysbench --test=memory --num-threads=<span class="number">1</span> --memory-block-size=<span class="number">4096</span> --memory-total-size=<span class="number">1</span>G run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>fileio测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#准备文件</span></span><br><span class="line">sysbench --test=fileio --file-total-size=<span class="number">400</span>M prepare</span><br><span class="line"><span class="comment">#随机读写模式</span></span><br><span class="line">sysbench --test=fileio --file-total-size=<span class="number">400</span>M --file-test-mode=rndrw --init-rng=on --max-time=<span class="number">300</span> --max-requests=<span class="number">0</span> run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>mysql测试(lua文件以sysbench源码实际路径为准)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#准备测试数据,创建表,插入100w数据</span></span><br><span class="line">sysbench --test=/usr/<span class="built_in">local</span>/src/sysbench/sysbench/tests/db/oltp.lua \</span><br><span class="line">              --mysql-host=host \</span><br><span class="line">              --mysql-port=<span class="number">9696</span> \</span><br><span class="line">              --mysql-user=kingshard \</span><br><span class="line">              --mysql-password=kingshard \</span><br><span class="line">              --mysql-db=kingshard \</span><br><span class="line">              --oltp-tables-count=<span class="number">1</span> \</span><br><span class="line">              --oltp-table-size=<span class="number">1000000</span> \</span><br><span class="line">              --num-threads=<span class="number">50</span> \</span><br><span class="line">              --max-requests=<span class="number">1000000</span> \</span><br><span class="line">              --report-interval=<span class="number">1</span> \</span><br><span class="line">              prepare</span><br><span class="line"><span class="comment">#测试select</span></span><br><span class="line">sysbench --test=/usr/<span class="built_in">local</span>/src/sysbench/sysbench/tests/db/select.lua \</span><br><span class="line">              --mysql-host=host \</span><br><span class="line">              --mysql-port=<span class="number">9696</span> \</span><br><span class="line">              --mysql-user=kingshard \</span><br><span class="line">              --mysql-password=kingshard \</span><br><span class="line">              --mysql-db=kingshard \</span><br><span class="line">              --oltp-tables-count=<span class="number">1</span> \</span><br><span class="line">              --oltp-table-size=<span class="number">1000000</span> \</span><br><span class="line">              --num-threads=<span class="number">16</span> \</span><br><span class="line">              --max-requests=<span class="number">1000000</span> \</span><br><span class="line">              --report-interval=<span class="number">1</span> \</span><br><span class="line">              --max-time=<span class="number">20</span> \</span><br><span class="line">              run</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>参考站点<br><a href="https://github.com/akopytov/sysbench" target="_blank" rel="external">https://github.com/akopytov/sysbench</a><br><a href="http://mingxinglai.com/cn/2013/07/sysbench/" target="_blank" rel="external">http://mingxinglai.com/cn/2013/07/sysbench/</a><br><a href="https://github.com/flike/kingshard/blob/master/doc/KingDoc/kingshard_performance_test.md" target="_blank" rel="external">https://github.com/flike/kingshard/blob/master/doc/KingDoc/kingshard_performance_test.md</a><br><a href="http://blog.csdn.net/lidan3959/article/details/36876517" target="_blank" rel="external">http://blog.csdn.net/lidan3959/article/details/36876517</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-05-31T09:53:20.000Z"><a href="/2016/05/31/使用Keepalived实现Redis高可用/">2016-05-31</a></time>
       
       
@@ -488,51 +570,6 @@
 
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2016-03-16T09:51:59.000Z"><a href="/2016/03/16/使用Dockerfile制作jdk和tomcat镜像/">2016-03-16</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2016/03/16/使用Dockerfile制作jdk和tomcat镜像/">使用Dockerfile制作jre和tomcat镜像</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>通过编写Dockerfile文件,制作了jdk和tomcat的镜像,算是练手了.</p>
-<p>jre镜像对应的Dockerfile<br><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">FROM</span> centos</span><br><span class="line"><span class="built_in">MAINTAINER</span>    wfir</span><br><span class="line"><span class="built_in">COPY</span> <span class="bash">jdk1.<span class="number">7.0</span>_79 /usr/<span class="built_in">local</span>/jdk</span><br><span class="line"></span><span class="built_in">ENV</span> JAVA_HOME    /usr/local/jdk</span><br><span class="line"><span class="built_in">ENV</span> PATH    $JAVA_HOME/bin:$PATH</span><br><span class="line"><span class="built_in">ENV</span> CLASSPATH    .:$JAVA_HOME/lib/tools.jar:$JAVA_HOME/lib/dt.jar</span><br></pre></td></tr></table></figure></p>
-<p>执行构建<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t wfir:jre-<span class="number">7</span> .</span><br></pre></td></tr></table></figure></p>
-<p>以交互方式运行容器,查看jdk安装情况<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it wfir:jre-<span class="number">7</span> /bin/bash</span><br></pre></td></tr></table></figure></p>
-<p>备注<br>在Dockerfile同级目录中需要有jdk1.7.0_79文件夹</p>
-<p>tomcat镜像对应的Dockerfile<br><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">FROM</span> wfir:jre-<span class="number">7</span></span><br><span class="line"><span class="built_in">MAINTAINER</span>    wfir</span><br><span class="line"><span class="built_in">EXPOSE</span> <span class="number">8080</span></span><br><span class="line">COPY apr-<span class="number">1.5</span>.<span class="number">2</span>.tar.gz /usr/local/src/</span><br><span class="line"><span class="built_in">COPY</span> <span class="bash">apr-util-<span class="number">1.5</span>.<span class="number">4</span>.tar.gz /usr/<span class="built_in">local</span>/src/</span><br><span class="line"></span><span class="built_in">COPY</span> <span class="bash">apr-install.sh /usr/<span class="built_in">local</span>/src/</span><br><span class="line"></span><span class="built_in">COPY</span> <span class="bash">tomcat8 /usr/<span class="built_in">local</span>/tomcat8</span><br><span class="line"></span><span class="built_in">COPY</span> <span class="bash">tomcat-install.sh /usr/<span class="built_in">local</span>/src/</span><br><span class="line"></span><span class="built_in">RUN</span> <span class="bash">yum -y install gcc make</span><br><span class="line"></span><span class="built_in">RUN</span> <span class="bash">/bin/bash /usr/<span class="built_in">local</span>/src/apr-install.sh</span><br><span class="line"></span><span class="built_in">RUN</span> <span class="bash">/bin/bash /usr/<span class="built_in">local</span>/src/tomcat-install.sh</span><br><span class="line"></span><span class="built_in">ENV</span> LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/apr/lib</span><br><span class="line"><span class="built_in">CMD</span> <span class="bash">/usr/<span class="built_in">local</span>/tomcat8/bin/catalina.sh run</span></span><br></pre></td></tr></table></figure></p>
-<p>apr-install.sh脚本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="shebang">#!/bin/bash</span></span><br><span class="line"><span class="built_in">source</span> /etc/profile</span><br><span class="line">apr_dir=/usr/<span class="built_in">local</span>/src</span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$apr_dir</span></span><br><span class="line">tar zxf apr-<span class="number">1.5</span>.<span class="number">2</span>.tar.gz</span><br><span class="line">tar zxf apr-util-<span class="number">1.5</span>.<span class="number">4</span>.tar.gz</span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$apr_dir</span>/apr-<span class="number">1.5</span>.<span class="number">2</span></span><br><span class="line">./configure </span><br><span class="line">make </span><br><span class="line">make install </span><br><span class="line">sleep <span class="number">2</span></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$apr_dir</span>/apr-util-<span class="number">1.5</span>.<span class="number">4</span></span><br><span class="line">./configure --with-apr=/usr/<span class="built_in">local</span>/apr </span><br><span class="line">make </span><br><span class="line">make install</span><br></pre></td></tr></table></figure></p>
-<p>tomcat-install.sh脚本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="shebang">#!/bin/bash</span></span><br><span class="line">tomcat_file=tomcat8</span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/<span class="variable">$&#123;tomcat_file&#125;</span>/bin</span><br><span class="line">tar zxf tomcat-native.tar.gz</span><br><span class="line"><span class="built_in">cd</span> tomcat-native-*-src/jni/native/</span><br><span class="line">./configure --with-apr=/usr/<span class="built_in">local</span>/apr --with-java-home=/usr/<span class="built_in">local</span>/jdk</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure></p>
-<p>执行构建<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t wfir:tomcat8-jre7 .</span><br></pre></td></tr></table></figure></p>
-<p>运行容器,映射tomcat运行端口和应用部署文件夹<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run <span class="operator">-d</span> -p <span class="number">8080</span>:<span class="number">8080</span> -v /tmp/webapps:/usr/<span class="built_in">local</span>/tomcat8/webapps -v /tmp/tomcatlogs:/usr/<span class="built_in">local</span>/tomcat8/logs wfir:tomcat8-jre7</span><br></pre></td></tr></table></figure></p>
-<p>备注<br>在Dockerfile同级目录需要有文档中需要的各个软件包和脚本文件</p>
-<p>后续可以把制作的docker镜像传到dockerhub上,略.</p>
-<p>have fun !</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
 
 <nav id="pagination">
   
@@ -583,6 +620,8 @@
     <li><a href="/tags/redis/">redis</a><small>2</small></li>
   
     <li><a href="/tags/shell/">shell</a><small>1</small></li>
+  
+    <li><a href="/tags/sysbench/">sysbench</a><small>1</small></li>
   
     <li><a href="/tags/tmux/">tmux</a><small>1</small></li>
   
