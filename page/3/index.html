@@ -50,6 +50,50 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-01-13T10:07:06.000Z"><a href="/2016/01/13/Ansible的mysql-user模块使用与MySQL账户GRANT权限设置/">2016-01-13</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/01/13/Ansible的mysql-user模块使用与MySQL账户GRANT权限设置/">Ansible的mysql_user模块使用与MySQL账户GRANT权限设置</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>前两天使用ansible进行mysql主从的部署,遇到一个使用不当ansible-mysql模块,导致mysql root账户权限改变的小问题,记录一下.</p>
+<p>mysql版本5.6.28</p>
+<p>创建数据库后,root账户默认有GRANT权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show grants;</span><br><span class="line">+---------------------------------------------------------------------+</span><br><span class="line">| Grants <span class="keyword">for</span> root@localhost                                           |</span><br><span class="line">+---------------------------------------------------------------------+</span><br><span class="line">| GRANT ALL PRIVILEGES ON *.* TO <span class="string">'root'</span>@<span class="string">'localhost'</span> WITH GRANT OPTION |</span><br><span class="line">| GRANT PROXY ON <span class="string">''</span>@<span class="string">''</span> TO <span class="string">'root'</span>@<span class="string">'localhost'</span> WITH GRANT OPTION        |</span><br><span class="line">+---------------------------------------------------------------------+</span><br></pre></td></tr></table></figure>
+<p>权限对应的字段为<br>mysql库<br>user表<br>Grant_priv字段,默认是Y</p>
+<p>如果不小心取消了root的GRANT权限,可以通过修改字段值的方式进行恢复</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; use mysql</span><br><span class="line">mysql&gt; update user <span class="built_in">set</span> Grant_priv=<span class="string">'Y'</span> <span class="built_in">where</span> user=<span class="string">'root'</span>;</span><br><span class="line">mysql&gt; flush privileges;</span><br></pre></td></tr></table></figure>
+<p>ansible有一个mysql_user的模块,可以对mysql账户进行操作.<br>在初始化root密码时,如果priv写成下面的样子会取消mysql root的GRANT权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">priv:*.*:ALL</span><br></pre></td></tr></table></figure>
+<p>建议在使用ansible的mysql_user模块时,对于初始化root密码,有两个方法<br>1 不加priv选项<br>2 priv选项添加grant值,即: priv:<em>.</em>:ALL,GRANT</p>
+<p>保证了mysql root账户GRANT权限,后续的添加主从复制账户权限操作就可以进行下去了.</p>
+<p>have fun!</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-01-12T06:36:02.000Z"><a href="/2016/01/12/使用percona-toolkit对大表数据库做变更/">2016-01-12</a></time>
       
       
@@ -220,6 +264,8 @@
     <li><a href="/tags/mysql/">mysql</a><small>4</small></li>
   
     <li><a href="/tags/nfs/">nfs</a><small>1</small></li>
+  
+    <li><a href="/tags/nginx/">nginx</a><small>1</small></li>
   
     <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
   

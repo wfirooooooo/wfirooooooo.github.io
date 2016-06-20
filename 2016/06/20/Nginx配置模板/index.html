@@ -3,16 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>常用JVM性能调优监控工具示例 | wfir&#39;s tech blog</title>
+  <title>Nginx配置模板 | wfir&#39;s tech blog</title>
   <meta name="author" content="wfir">
   
-  <meta name="description" content="jps输出JVM中运行的状态信息参数详解-q 不输出类名、Jar名和传入main方法的参数-m 输出传入main方法的参数-l 输出main类或Jar的全限名-v 输出传入JVM的参数示例jps -m -l
-jstack查看Java进程中的线程堆栈信息参数详解-l long listings，会打印">
+  <meta name="description" content="工作中用Nginx的地方很多,每次部署好后都面临Nginx的配置问题.这里把工作中用到的Nginx配置整理成模板,方便今后查阅.
+Nginx配置文件分为3种:
+
+Nginx主配置文件
+nginx.conf   包含全局配置
+
+
+Server配置文件
+server.conf  包含server访问规则">
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="常用JVM性能调优监控工具示例"/>
+  <meta property="og:title" content="Nginx配置模板"/>
   <meta property="og:site_name" content="wfir&#39;s tech blog"/>
 
   
@@ -52,20 +59,36 @@ jstack查看Java进程中的线程堆栈信息参数详解-l long listings，会
     <header>
       
         <div class="icon"></div>
-        <time datetime="2016-05-19T09:57:14.000Z"><a href="/2016/05/19/常用JVM性能调优监控工具示例/">2016-05-19</a></time>
+        <time datetime="2016-06-20T07:27:24.000Z"><a href="/2016/06/20/Nginx配置模板/">2016-06-20</a></time>
       
       
   
-    <h1 class="title">常用JVM性能调优监控工具示例</h1>
+    <h1 class="title">Nginx配置模板</h1>
   
 
     </header>
     <div class="entry">
       
-        <p><strong>jps</strong><br>输出JVM中运行的状态信息<br>参数详解<br>-q 不输出类名、Jar名和传入main方法的参数<br>-m 输出传入main方法的参数<br>-l 输出main类或Jar的全限名<br>-v 输出传入JVM的参数<br>示例<br>jps -m -l</p>
-<p><strong>jstack</strong><br>查看Java进程中的线程堆栈信息<br>参数详解<br>-l long listings，会打印出额外的锁信息，在发生死锁时可以用jstack -l pid来观察锁持有情况<br>-m mixed mode，不仅会输出Java堆栈信息，还会输出C/C++堆栈信息（比如Native方法）<br>示例<br>jstack -l PID</p>
-<p><strong>jmap和jhat</strong><br>jmap用于查看堆内存使用情况,一般结合jhat使用<br>参数详解<br>-histo[:live]        打印java对象堆直方图,如果带live参数,只打印存活的对象数量<br>-permstat            打印持久代统计信息<br>-finalizerinfo       打印等待终止对象信息<br>-dump:<dump-options> 输出hprof数据到指定文件<br>-J<flag>             标示运行时系统架构<br>示例<br>jmap -permstat pid    打印进程的类加载器和类加载器加载的持久代对象信息<br>jmap -heap pid    查看进程堆内存使用情况<br>jmap -histo[:live] pid    查看堆内存中的对象数目、大小统计直方图<br>jmap -dump:format=b,file=dumpFileName pid    把进程内存使用情况dump到文件中，再用jhat分析查看<br>jhat -J-mx512m -port 9998 dumpFileName</flag></dump-options></p>
-<p>参考站点<br><a href="http://my.oschina.net/feichexia/blog/196575" target="_blank" rel="external">http://my.oschina.net/feichexia/blog/196575</a><br><a href="http://docs.oracle.com/javase/7/docs/technotes/tools/share/jstack.html" target="_blank" rel="external">http://docs.oracle.com/javase/7/docs/technotes/tools/share/jstack.html</a></p>
+        <p>工作中用Nginx的地方很多,每次部署好后都面临Nginx的配置问题.这里把工作中用到的Nginx配置整理成模板,方便今后查阅.</p>
+<p>Nginx配置文件分为3种:</p>
+<ol>
+<li>Nginx主配置文件<ul>
+<li>nginx.conf   包含全局配置</li>
+</ul>
+</li>
+<li>Server配置文件<ul>
+<li>server.conf  包含server访问规则</li>
+</ul>
+</li>
+<li>Upstream配置文件<ul>
+<li>upstream.conf    包含后端服务器信息 </li>
+</ul>
+</li>
+</ol>
+<p>各个文件内容如下:</p>
+<p><strong>nginx.conf</strong><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">user  nginx nginx ;&#10;worker_processes  auto;&#10;#error_log  logs/error.log;&#10;pid        logs/nginx.pid;&#10;worker_rlimit_nofile 102400;&#10;&#10;events &#123;&#10;use epoll;&#10;multi_accept on;&#10;worker_connections 10240;&#10;&#125;&#10;&#10;http &#123;&#10;include mime.types;&#10;default_type  application/octet-stream;&#10;charset UTF-8;&#10;log_format  main  &#39;$remote_addr - $remote_user [$time_local] &#34;$request&#34; &#39;&#10;                  &#39;$status $body_bytes_sent &#34;$http_referer&#34; &#39;&#10;                  &#39;&#34;$http_user_agent&#34; &#34;$http_x_forwarded_for&#34;&#39; &#39;$request_time&#39; &#39;$upstream_addr&#39;;&#10;#access_log  logs/access.log  main;&#10;sendfile        on;&#10;tcp_nopush     on;&#10;server_tokens off;&#10;keepalive_timeout  65;&#10;&#10;gzip on;&#10;gzip_proxied any;&#10;gzip_comp_level 4;&#10;gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;&#10;gzip_min_length 1k;&#10;gzip_buffers 4 16k;&#10;gzip_http_version 1.1;&#10;gzip_vary on;&#10;&#10;client_max_body_size 10m;&#10;client_body_buffer_size 128k;&#10;&#10;proxy_connect_timeout 60;&#9;&#10;proxy_read_timeout 60;&#10;proxy_send_timeout 60;&#10;proxy_buffer_size 16k;&#10;proxy_buffers 4 32k;&#10;proxy_busy_buffers_size&#160;64k;&#160;&#10;proxy_temp_file_write_size&#160;128k;&#160;&#10;&#10;#include&#25991;&#20214;&#36335;&#24452;&#20197;&#23454;&#38469;&#36335;&#24452;&#20026;&#20934;&#10;include /app/nginx/conf/vhost/server.conf;&#10;include /app/nginx/conf/vhost/upstream.conf;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>server.conf</strong><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server &#123;&#10;listen       80;&#9;                            #or  ip:port&#10;server_name localhost;&#9;                        #or domain or ip&#10;access_log  logs/localhost_access.log  main;&#9;#Change the log file name identifide by the servername&#10;error_log  logs/localhost_error.log;&#10;&#10;location / &#123;&#10;&#9;proxy_set_header Host $host;&#10;    proxy_set_header X-Forwarded-For $http_x_forwarded_for;&#10;    #proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;&#10;    proxy_pass http://server_pool;&#10;&#125;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>upstream.conf</strong><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upstream server_pool &#123;&#10;    #ip_hash;&#10;&#9;server&#9;realserver_ip_1:8080 weight=10 max_fails=2 fail_timeout=30s;&#10;&#9;server&#9;realserver_ip_2:8080 weight=10 max_fails=2 fail_timeout=30s;&#10;&#9;server&#9;realserver_ip_3:8080 weight=10 max_fails=2 fail_timeout=30s;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
 <p>have fun !</p>
 
       
@@ -76,7 +99,7 @@ jstack查看Java进程中的线程堆栈信息参数详解-l long listings，会
         
   
   <div class="tags">
-    <a href="/tags/java/">java</a>
+    <a href="/tags/nginx/">nginx</a>
   </div>
 
         
@@ -119,7 +142,7 @@ jstack查看Java进程中的线程堆栈信息参数详解-l long listings，会
   }(document, 'script', 'facebook-jssdk'));
 </script>
 
-<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/05/19/常用JVM性能调优监控工具示例/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/06/20/Nginx配置模板/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
       
   
 </section>

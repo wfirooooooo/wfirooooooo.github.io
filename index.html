@@ -50,6 +50,59 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-06-20T07:27:24.000Z"><a href="/2016/06/20/Nginx配置模板/">2016-06-20</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/06/20/Nginx配置模板/">Nginx配置模板</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>工作中用Nginx的地方很多,每次部署好后都面临Nginx的配置问题.这里把工作中用到的Nginx配置整理成模板,方便今后查阅.</p>
+<p>Nginx配置文件分为3种:</p>
+<ol>
+<li>Nginx主配置文件<ul>
+<li>nginx.conf   包含全局配置</li>
+</ul>
+</li>
+<li>Server配置文件<ul>
+<li>server.conf  包含server访问规则</li>
+</ul>
+</li>
+<li>Upstream配置文件<ul>
+<li>upstream.conf    包含后端服务器信息 </li>
+</ul>
+</li>
+</ol>
+<p>各个文件内容如下:</p>
+<p><strong>nginx.conf</strong><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">user  nginx nginx ;&#10;worker_processes  auto;&#10;#error_log  logs/error.log;&#10;pid        logs/nginx.pid;&#10;worker_rlimit_nofile 102400;&#10;&#10;events &#123;&#10;use epoll;&#10;multi_accept on;&#10;worker_connections 10240;&#10;&#125;&#10;&#10;http &#123;&#10;include mime.types;&#10;default_type  application/octet-stream;&#10;charset UTF-8;&#10;log_format  main  &#39;$remote_addr - $remote_user [$time_local] &#34;$request&#34; &#39;&#10;                  &#39;$status $body_bytes_sent &#34;$http_referer&#34; &#39;&#10;                  &#39;&#34;$http_user_agent&#34; &#34;$http_x_forwarded_for&#34;&#39; &#39;$request_time&#39; &#39;$upstream_addr&#39;;&#10;#access_log  logs/access.log  main;&#10;sendfile        on;&#10;tcp_nopush     on;&#10;server_tokens off;&#10;keepalive_timeout  65;&#10;&#10;gzip on;&#10;gzip_proxied any;&#10;gzip_comp_level 4;&#10;gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;&#10;gzip_min_length 1k;&#10;gzip_buffers 4 16k;&#10;gzip_http_version 1.1;&#10;gzip_vary on;&#10;&#10;client_max_body_size 10m;&#10;client_body_buffer_size 128k;&#10;&#10;proxy_connect_timeout 60;&#9;&#10;proxy_read_timeout 60;&#10;proxy_send_timeout 60;&#10;proxy_buffer_size 16k;&#10;proxy_buffers 4 32k;&#10;proxy_busy_buffers_size&#160;64k;&#160;&#10;proxy_temp_file_write_size&#160;128k;&#160;&#10;&#10;#include&#25991;&#20214;&#36335;&#24452;&#20197;&#23454;&#38469;&#36335;&#24452;&#20026;&#20934;&#10;include /app/nginx/conf/vhost/server.conf;&#10;include /app/nginx/conf/vhost/upstream.conf;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>server.conf</strong><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server &#123;&#10;listen       80;&#9;                            #or  ip:port&#10;server_name localhost;&#9;                        #or domain or ip&#10;access_log  logs/localhost_access.log  main;&#9;#Change the log file name identifide by the servername&#10;error_log  logs/localhost_error.log;&#10;&#10;location / &#123;&#10;&#9;proxy_set_header Host $host;&#10;    proxy_set_header X-Forwarded-For $http_x_forwarded_for;&#10;    #proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;&#10;    proxy_pass http://server_pool;&#10;&#125;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>upstream.conf</strong><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upstream server_pool &#123;&#10;    #ip_hash;&#10;&#9;server&#9;realserver_ip_1:8080 weight=10 max_fails=2 fail_timeout=30s;&#10;&#9;server&#9;realserver_ip_2:8080 weight=10 max_fails=2 fail_timeout=30s;&#10;&#9;server&#9;realserver_ip_3:8080 weight=10 max_fails=2 fail_timeout=30s;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-06-03T06:39:09.000Z"><a href="/2016/06/03/sysbench配置和示例/">2016-06-03</a></time>
       
       
@@ -523,53 +576,6 @@
 
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2016-03-21T07:34:05.000Z"><a href="/2016/03/21/使用xtrabackup工具动态增加mysql从库/">2016-03-21</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2016/03/21/使用xtrabackup工具动态增加mysql从库/">使用xtrabackup工具动态增加mysql从库</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>xtrabackup是一个用于mysql数据备份和恢复的工具,这里只是简单用来做扩充mysql从库的示例.</p>
-<p>系统环境<br>CentOS    6.7<br>MySQL    5.6.28<br>xtrabackup    2.3.3-1</p>
-<p>安装xtrabackup(rpm包的方式)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum -y install perl perl-devel libaio libaio-devel perl-Time-HiRes perl-DBD-MySQL libev libev-devel</span><br><span class="line">wget https://www.percona.com/downloads/XtraBackup/Percona-XtraBackup-<span class="number">2.3</span>.<span class="number">3</span>/binary/redhat/<span class="number">6</span>/x86_64/percona-xtrabackup-<span class="number">2.3</span>.<span class="number">3</span>-<span class="number">1</span>.el6.x86_64.rpm</span><br><span class="line">rpm -ivh percona-xtrabackup-<span class="number">2.3</span>.<span class="number">3</span>-<span class="number">1</span>.el6.x86_64.rpm</span><br></pre></td></tr></table></figure></p>
-<p>备份数据(在mysql主库所在服务器执行)<br>(以时间戳方式生成备份数据文件夹)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">innobackupex --user=root --password=<span class="number">123456</span> --backup /backup/</span><br></pre></td></tr></table></figure></p>
-<p>拷贝备份的数据到新的从服务器上<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r /backup/<span class="number">2016</span>-<span class="number">03</span>-<span class="number">21</span>_14-<span class="number">49</span>-<span class="number">15</span>    root@new_mysql_slave:/backup/</span><br></pre></td></tr></table></figure></p>
-<p>新mysql从服务器的操作<br>停止mysql服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/etc/init.d/mysqld stop</span><br></pre></td></tr></table></figure></p>
-<p>清空mysql的数据目录<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /tmp/mysql_bak</span><br><span class="line">mv /var/lib/mysql/* /tmp/mysql_bak/</span><br></pre></td></tr></table></figure></p>
-<p>恢复mysql数据<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">innobackupex --user=root --password=<span class="number">123456</span> --copy-back /backup/<span class="number">2016</span>-<span class="number">03</span>-<span class="number">21</span>_14-<span class="number">49</span>-<span class="number">15</span>/</span><br></pre></td></tr></table></figure></p>
-<p>调整mysql数据文件夹权限<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chown -R mysql.mysql /var/lib/mysql</span><br></pre></td></tr></table></figure></p>
-<p>启动mysql服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/etc/init.d/mysqld start</span><br></pre></td></tr></table></figure></p>
-<p>查看xtrabackup_info文件,确定mysql主的bin-log信息<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">less /backup/<span class="number">2016</span>-<span class="number">03</span>-<span class="number">21</span>_14-<span class="number">49</span>-<span class="number">15</span>/xtrabackup_info</span><br><span class="line">binlog_pos = filename <span class="string">'mysql-bin.000001'</span>, position <span class="string">'120'</span></span><br></pre></td></tr></table></figure></p>
-<p>设置主从同步<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; change master to master_host=<span class="string">'mysql_master_ip'</span>,master_user=<span class="string">'repl'</span>,master_password=<span class="string">'12345'</span>,master_<span class="built_in">log</span>_file=<span class="string">'mysql-bin.000001'</span>,master_<span class="built_in">log</span>_pos=<span class="number">120</span>;</span><br><span class="line">mysql&gt; start slave;</span><br></pre></td></tr></table></figure></p>
-<p>查看主从状态是否正常.</p>
-<p>参考站点:<br><a href="http://lizhenliang.blog.51cto.com/7876557/1669829?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io" target="_blank" rel="external">http://lizhenliang.blog.51cto.com/7876557/1669829?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io</a><br><a href="https://www.digitalocean.com/community/tutorials/how-to-create-hot-backups-of-mysql-databases-with-percona-xtrabackup-on-ubuntu-14-04" target="_blank" rel="external">https://www.digitalocean.com/community/tutorials/how-to-create-hot-backups-of-mysql-databases-with-percona-xtrabackup-on-ubuntu-14-04</a><br><a href="https://www.percona.com/doc/percona-xtrabackup/2.3/index.html#user-s-manual" target="_blank" rel="external">https://www.percona.com/doc/percona-xtrabackup/2.3/index.html#user-s-manual</a></p>
-<p>have fun !</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
 
 <nav id="pagination">
   
@@ -614,6 +620,8 @@
     <li><a href="/tags/mysql/">mysql</a><small>4</small></li>
   
     <li><a href="/tags/nfs/">nfs</a><small>1</small></li>
+  
+    <li><a href="/tags/nginx/">nginx</a><small>1</small></li>
   
     <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
   
