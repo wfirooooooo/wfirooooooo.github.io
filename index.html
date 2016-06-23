@@ -50,6 +50,79 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-06-23T08:08:22.000Z"><a href="/2016/06/23/使用Perf和FlameGraph进行系统性能分析/">2016-06-23</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/06/23/使用Perf和FlameGraph进行系统性能分析/">使用Perf和FlameGraph进行系统性能分析</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>Perf是一款Linux平台的系统性能诊断和分析工具,通过它可以查看应用程序的运行性能,只是在图形方面表现的不足,好在有Flame Graph.Flame Graph能够把Perf采集的数据转换为svg矢量图.<br>本文就简单说说它们的用法.</p>
+<p><strong>Perf</strong></p>
+<ol>
+<li><p>Perf安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y perf</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Perf使用</p>
+</li>
+</ol>
+<ul>
+<li>perf list<br>  列出所有perf能够采样点的事件</li>
+<li>perf stat<br>  以精简的方式提供被调试程序的整体情况和汇总数据</li>
+<li>perf top<br>  列出所有进程,实时显示统计信息</li>
+<li>perf record<br>  记录单个函数级别的统计信息</li>
+<li>perf report<br>  显示统计结果</li>
+</ul>
+<p><strong>Flame Graph</strong><br>FLame Graph其实是一组perl脚本,用以将perf等工具获取的原始采样数据转换为Flame Graph能够识别的文件格式,除了perf,还支持Dtrace,Systemtap以及XCode Instruments等工具.<br>Flame Graph能够生成svg矢量图,X轴代表采样总量,Y轴代表栈深度.每个框代表一个栈里的函数,宽度代表占用CPU的总时间.较宽的框表示该函数运行时间较慢或调用次数较多,从而占用CPU时间多.</p>
+<ul>
+<li>Flame Graph脚本列表<blockquote>
+<p>flamegraph.pl<br>stackcollapse-elfutils.pl<br>stackcollapse-gdb.pl<br>stackcollapse-instruments.pl<br>stackcollapse-jstack.pl<br>stackcollapse-perf.pl<br>stackcollapse.pl<br>stackcollapse-pmc.pl<br>stackcollapse-recursive.pl<br>stackcollapse-stap.pl<br>stackcollapse-vtune.pl</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>使用示例</strong></p>
+<ol>
+<li><p>使用perf record生成采样数据perf.data</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perf record <span class="operator">-a</span> -g</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用perf script对perf.data进行解析</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perf script -i perf.data &amp;&gt; perf.unfold</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将perf.unfold中的符号进行折叠</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./stackcollapse-perf.pl perf.unfold &amp;&gt; perf.folded</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成svg图</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./flamegraph.pl perf.folded &gt; perf.svg</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><strong>参考站点</strong></p>
+<p><a href="https://www.ibm.com/developerworks/cn/linux/l-cn-perf1" target="_blank" rel="external">https://www.ibm.com/developerworks/cn/linux/l-cn-perf1</a><br><a href="https://github.com/brendangregg/FlameGraph" target="_blank" rel="external">https://github.com/brendangregg/FlameGraph</a><br><a href="http://kernel.taobao.org/index.php?title=Documents/Perf_flame_graph" target="_blank" rel="external">http://kernel.taobao.org/index.php?title=Documents/Perf_flame_graph</a><br><a href="http://unix.stackexchange.com/questions/14227/do-i-need-root-admin-permissions-to-run-userspace-perf-tool-perf-events-ar" target="_blank" rel="external">http://unix.stackexchange.com/questions/14227/do-i-need-root-admin-permissions-to-run-userspace-perf-tool-perf-events-ar</a><br><a href="https://gist.github.com/trevnorris/9616784" target="_blank" rel="external">https://gist.github.com/trevnorris/9616784</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-06-20T07:27:24.000Z"><a href="/2016/06/20/Nginx配置模板/">2016-06-20</a></time>
       
       
@@ -532,50 +605,6 @@
 
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2016-05-12T08:36:23.000Z"><a href="/2016/05/12/Redis-Dump部署/">2016-05-12</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2016/05/12/Redis-Dump部署/">Redis-Dump部署</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>Redis-Dump是一个导出Redis数据为JSON格式的工具,使用Ruby开发.<br>Redis-Dump能够实现对指定数据库的导入导出操作,本文就介绍一下它的安装方法</p>
-<p>操作系统    CentOS 6.x</p>
-<p>安装RVM<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gpg --keyserver hkp://keys.gnupg.net --recv-keys <span class="number">409</span>B6B1796C275462A1703113804BB82D39DC0E3</span><br><span class="line">curl <span class="operator">-s</span>SL https://get.rvm.io | bash <span class="operator">-s</span> stable</span><br></pre></td></tr></table></figure></p>
-<p>生效RVM环境变量<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> /etc/profile.d/rvm.sh</span><br></pre></td></tr></table></figure></p>
-<p>修改RVM源为Ruby China的源<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"ruby_url=https://cache.ruby-china.org/pub/ruby"</span> &gt; /usr/<span class="built_in">local</span>/rvm/user/db</span><br></pre></td></tr></table></figure></p>
-<p>使用RVM安装Ruby<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rvm requirements</span><br><span class="line">rvm install <span class="number">2.3</span>.<span class="number">0</span></span><br></pre></td></tr></table></figure></p>
-<p>设置Ruby版本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rvm use <span class="number">2.3</span>.<span class="number">0</span> --default</span><br></pre></td></tr></table></figure></p>
-<p>安装Redis-Dump<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem install redis-dump</span><br></pre></td></tr></table></figure></p>
-<p><strong>FAQ</strong><br>如果出现gem无法安装的情况,如下:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR:  While executing gem ... (Gem::RemoteFetcher::FetchError)&#10;    SSL_connect SYSCALL returned=5 errno=0 state=SSLv2/v3 read server hello A (https://rubygems.global.ssl.fastly.net/quick/Marshal.4.8/redis-3.3.0.gemspec.rz)</span><br></pre></td></tr></table></figure></p>
-<p>这是由于墙的问题,替换为淘宝的源就好了<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/</span><br></pre></td></tr></table></figure></p>
-<p>参考站点<br><a href="https://ruby-china.org/wiki/install_ruby_guide" target="_blank" rel="external">https://ruby-china.org/wiki/install_ruby_guide</a><br><a href="https://github.com/delano/redis-dump" target="_blank" rel="external">https://github.com/delano/redis-dump</a><br><a href="https://ruby.taobao.org/" target="_blank" rel="external">https://ruby.taobao.org/</a></p>
-<p>have fun !</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
 
 <nav id="pagination">
   
@@ -610,6 +639,8 @@
     <li><a href="/tags/java/">java</a><small>1</small></li>
   
     <li><a href="/tags/keepalived/">keepalived</a><small>1</small></li>
+  
+    <li><a href="/tags/linux/">linux</a><small>1</small></li>
   
     <li><a href="/tags/lvs/">lvs</a><small>1</small></li>
   
