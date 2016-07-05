@@ -50,6 +50,49 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-01-21T09:41:59.000Z"><a href="/2016/01/21/keepalived的scripts/">2016-01-21</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/01/21/keepalived的scripts/">keepalived的scripts</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>keepalived是常用的ha软件,基本配置比较简单.前一阵子看到一篇歪果仁写的<a href="https://tobrunet.ch/2013/07/keepalived-check-and-notify-scripts/" target="_blank" rel="external">关于keepalived的check和notify的scripts</a>,写的很好.这里简单介绍一下.</p>
+<p>我们针对进程的检测,可以编写check script,让keepalive去管理,示例如下:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vrrp_script chk_myscript &#123;&#10;  script&#9;&#34;/usr/local/bin/mycheckscript.sh&#34;&#10;  interval&#9;2    # check every 2 seconds&#10;  fall      2    # require 2 failures for KO&#10;  rise      2    # require 2 successes for OK&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们定义的chk_myscript要写到instance的track_script下:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vrrp_instance MyVRRPInstance &#123;&#10;  state MASTER&#10;  interface eth0&#10;  virtual_router_id 5&#10;  priority 200&#10;  advert_int 1&#10;  virtual_ipaddress &#123;&#10;    192.168.1.1/32 dev eth0&#10;  &#125;&#10;  track_script &#123;&#10;    chk_myscript&#10;  &#125;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面两个配置表示的是:<br>针对/usr/local/bin/mycheckscript.sh脚本,当track_script返回非0值两次后,vrrp instance会转换状态为fault,移除vip,停止广播vrrp数据包.</p>
+<p>当check script发现keepalived状态变化时,会调用notify script,并添加以下参数:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- $1 = &#8220;GROUP&#8221; or &#8220;INSTANCE&#8221;&#10;- $2 = name of group or instance&#10;- $3 = target state of transition (&#8220;MASTER&#8221;, &#8220;BACKUP&#8221;, &#8220;FAULT&#8221;)</span><br></pre></td></tr></table></figure></p>
+<p>notify script也写到instance里:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vrrp_instance MyVRRPInstance &#123;&#10;[...]&#10;notify    /usr/local/bin/keepalivednotify.sh&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>关于notify script(keepalivednotify.sh),示例如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="shebang">#!/bin/bash</span></span><br><span class="line">TYPE=<span class="variable">$1</span></span><br><span class="line">NAME=<span class="variable">$2</span></span><br><span class="line">STATE=<span class="variable">$3</span></span><br><span class="line"><span class="keyword">case</span> <span class="variable">$STATE</span> <span class="keyword">in</span></span><br><span class="line">    <span class="string">"MASTER"</span>) /etc/init.d/nginx start</span><br><span class="line">        <span class="built_in">exit</span> <span class="number">0</span></span><br><span class="line">    ;;</span><br><span class="line">	<span class="string">"BACKUP"</span>) /etc/init.d/nginx stop</span><br><span class="line">        <span class="built_in">exit</span> <span class="number">0</span></span><br><span class="line">    ;;</span><br><span class="line">	<span class="string">"FAULT"</span>) /etc/init.d/nginx stop</span><br><span class="line">        <span class="built_in">exit</span> <span class="number">0</span></span><br><span class="line">    ;;</span><br><span class="line">    *) <span class="built_in">echo</span> <span class="string">"unknown state"</span></span><br><span class="line">		<span class="built_in">exit</span> <span class="number">1</span></span><br><span class="line">    ;;</span><br><span class="line"><span class="keyword">esac</span></span><br></pre></td></tr></table></figure></p>
+<p>如果以check nginx进程为例,mycheckscript.sh的内容示例如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$(ps -ef | grep "nginx: master process"| grep -v grep )</span>X"</span> == <span class="string">"X"</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line"><span class="built_in">exit</span> <span class="number">1</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line"><span class="built_in">exit</span> <span class="number">0</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure></p>
+<p>keepalived会根据vrrp state返回值进行notify script的执行,不用停止keepalived本身.</p>
+<p>参考链接<br><a href="https://tobrunet.ch/2013/07/keepalived-check-and-notify-scripts/" target="_blank" rel="external">https://tobrunet.ch/2013/07/keepalived-check-and-notify-scripts/</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-01-20T02:44:26.000Z"><a href="/2016/01/20/markdown语法小结/">2016-01-20</a></time>
       
       
@@ -304,6 +347,8 @@
     <li><a href="/tags/docker/">docker</a><small>1</small></li>
   
     <li><a href="/tags/git/">git</a><small>1</small></li>
+  
+    <li><a href="/tags/golang/">golang</a><small>1</small></li>
   
     <li><a href="/tags/java/">java</a><small>1</small></li>
   
