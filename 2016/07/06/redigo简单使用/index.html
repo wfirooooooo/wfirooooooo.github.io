@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>redigo简单使用 | wfir&#39;s tech blog</title>
+  <meta name="author" content="wfir">
+  
+  <meta name="description" content="今天简单使用了一下Golang的Redis Client程序包Redigo.记录一下比较关注的几个方面.
+安装Redigo1go get github.com/garyburd/redigo/redis
+会在GOPATH目录下的src和pkg文件夹中生成对应的包文件
+连接Redis服务12345c,">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="redigo简单使用"/>
+  <meta property="og:site_name" content="wfir&#39;s tech blog"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="wfir&#39;s tech blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">wfir&#39;s tech blog</a></h1>
+  <h2><a href="/"></a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2016-07-06T07:32:44.000Z"><a href="/2016/07/06/redigo简单使用/">2016-07-06</a></time>
+      
+      
+  
+    <h1 class="title">redigo简单使用</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天简单使用了一下Golang的Redis Client程序包Redigo.记录一下比较关注的几个方面.</p>
+<h1 id="u5B89_u88C5Redigo"><a href="#u5B89_u88C5Redigo" class="headerlink" title="安装Redigo"></a>安装Redigo</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> get github.com/garyburd/redigo/redis</span><br></pre></td></tr></table></figure>
+<p>会在GOPATH目录下的src和pkg文件夹中生成对应的包文件</p>
+<h1 id="u8FDE_u63A5Redis_u670D_u52A1"><a href="#u8FDE_u63A5Redis_u670D_u52A1" class="headerlink" title="连接Redis服务"></a>连接Redis服务</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">c, err := redis.Dial(<span class="string">"tcp"</span>, <span class="string">"192.168.10.12:6379"</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">	<span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">defer</span> c.Close()</span><br></pre></td></tr></table></figure>
+<h1 id="u8F93_u5165Redis_u5BC6_u7801"><a href="#u8F93_u5165Redis_u5BC6_u7801" class="headerlink" title="输入Redis密码"></a>输入Redis密码</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c.Send(<span class="string">"auth"</span>, <span class="string">"xxx"</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="u9009_u62E9Redis_u5E93"><a href="#u9009_u62E9Redis_u5E93" class="headerlink" title="选择Redis库"></a>选择Redis库</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//select db</span></span><br><span class="line">c.Do(<span class="string">"select"</span>, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="set_u548Cget_key"><a href="#set_u548Cget_key" class="headerlink" title="set和get key"></a>set和get key</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//set</span></span><br><span class="line">c.Do(<span class="string">"SET"</span>, <span class="string">"message1"</span>, <span class="string">"Hello World"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//get</span></span><br><span class="line">world, err := redis.String(c.Do(<span class="string">"GET"</span>, <span class="string">"message1"</span>))</span><br><span class="line"><span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">	fmt.Println(<span class="string">"key not found"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fmt.Println(world)</span><br></pre></td></tr></table></figure>
+<h1 id="u5B8C_u6574_u7684_u4EE3_u7801_u5982_u4E0B"><a href="#u5B8C_u6574_u7684_u4EE3_u7801_u5982_u4E0B" class="headerlink" title="完整的代码如下"></a>完整的代码如下</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">"github.com/garyburd/redigo/redis"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	c, err := redis.Dial(<span class="string">"tcp"</span>, <span class="string">"192.168.10.12:6379"</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> c.Close()</span><br><span class="line"></span><br><span class="line">	c.Send(<span class="string">"auth"</span>, <span class="string">"xxx"</span>)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//select db</span></span><br><span class="line">	c.Do(<span class="string">"select"</span>, <span class="number">1</span>)</span><br><span class="line">	<span class="comment">//set</span></span><br><span class="line">	c.Do(<span class="string">"SET"</span>, <span class="string">"message1"</span>, <span class="string">"Hello World"</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">//get</span></span><br><span class="line">	world, err := redis.String(c.Do(<span class="string">"GET"</span>, <span class="string">"message1"</span>))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"key not found"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	fmt.Println(world)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参考站点</p>
+<p><a href="https://www.reddit.com/r/golang/comments/3dspr9/which_redis_client/" target="_blank" rel="external">https://www.reddit.com/r/golang/comments/3dspr9/which_redis_client/</a><br><a href="https://godoc.org/github.com/garyburd/redigo/redis" target="_blank" rel="external">https://godoc.org/github.com/garyburd/redigo/redis</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/golang/">golang</a>
+  </div>
+
+        
+  <div class="addthis addthis_toolbox addthis_default_style">
+    
+      <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    
+    
+      <a class="addthis_button_tweet"></a>
+    
+    
+      <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    
+    
+      <a class="addthis_button_pinterest_pinit" pi:pinit:layout="horizontal"></a>
+    
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js"></script>
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+  <h1 class="title">留言</h1>
+
+  
+      <div id="fb-root"></div>
+<script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=123456789012345";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div class="fb-comments" data-href="http://wfirooooooo.github.io/2016/07/06/redigo简单使用/index.html" data-num-posts="5" data-width="840" data-colorscheme="light"></div>
+      
+  
+</section>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜尋">
+    <input type="hidden" name="q" value="site:wfirooooooo.github.io">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tag">
+  <h3 class="title">標籤</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/activemq/">activemq</a><small>1</small></li>
+  
+    <li><a href="/tags/ansible/">ansible</a><small>2</small></li>
+  
+    <li><a href="/tags/docker/">docker</a><small>1</small></li>
+  
+    <li><a href="/tags/git/">git</a><small>1</small></li>
+  
+    <li><a href="/tags/golang/">golang</a><small>2</small></li>
+  
+    <li><a href="/tags/java/">java</a><small>1</small></li>
+  
+    <li><a href="/tags/keepalived/">keepalived</a><small>1</small></li>
+  
+    <li><a href="/tags/linux/">linux</a><small>1</small></li>
+  
+    <li><a href="/tags/lvs/">lvs</a><small>1</small></li>
+  
+    <li><a href="/tags/markdown/">markdown</a><small>1</small></li>
+  
+    <li><a href="/tags/mha/">mha</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>4</small></li>
+  
+    <li><a href="/tags/nfs/">nfs</a><small>1</small></li>
+  
+    <li><a href="/tags/nginx/">nginx</a><small>1</small></li>
+  
+    <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
+  
+    <li><a href="/tags/redis/">redis</a><small>2</small></li>
+  
+    <li><a href="/tags/shell/">shell</a><small>1</small></li>
+  
+    <li><a href="/tags/sysbench/">sysbench</a><small>1</small></li>
+  
+    <li><a href="/tags/tmux/">tmux</a><small>1</small></li>
+  
+    <li><a href="/tags/tomcat/">tomcat</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2016 wfir
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

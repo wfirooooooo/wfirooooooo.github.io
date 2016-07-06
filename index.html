@@ -50,6 +50,49 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-07-06T07:32:44.000Z"><a href="/2016/07/06/redigo简单使用/">2016-07-06</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/07/06/redigo简单使用/">redigo简单使用</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天简单使用了一下Golang的Redis Client程序包Redigo.记录一下比较关注的几个方面.</p>
+<h1 id="u5B89_u88C5Redigo"><a href="#u5B89_u88C5Redigo" class="headerlink" title="安装Redigo"></a>安装Redigo</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> get github.com/garyburd/redigo/redis</span><br></pre></td></tr></table></figure>
+<p>会在GOPATH目录下的src和pkg文件夹中生成对应的包文件</p>
+<h1 id="u8FDE_u63A5Redis_u670D_u52A1"><a href="#u8FDE_u63A5Redis_u670D_u52A1" class="headerlink" title="连接Redis服务"></a>连接Redis服务</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">c, err := redis.Dial(<span class="string">"tcp"</span>, <span class="string">"192.168.10.12:6379"</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">	<span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">defer</span> c.Close()</span><br></pre></td></tr></table></figure>
+<h1 id="u8F93_u5165Redis_u5BC6_u7801"><a href="#u8F93_u5165Redis_u5BC6_u7801" class="headerlink" title="输入Redis密码"></a>输入Redis密码</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c.Send(<span class="string">"auth"</span>, <span class="string">"xxx"</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="u9009_u62E9Redis_u5E93"><a href="#u9009_u62E9Redis_u5E93" class="headerlink" title="选择Redis库"></a>选择Redis库</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//select db</span></span><br><span class="line">c.Do(<span class="string">"select"</span>, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="set_u548Cget_key"><a href="#set_u548Cget_key" class="headerlink" title="set和get key"></a>set和get key</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//set</span></span><br><span class="line">c.Do(<span class="string">"SET"</span>, <span class="string">"message1"</span>, <span class="string">"Hello World"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//get</span></span><br><span class="line">world, err := redis.String(c.Do(<span class="string">"GET"</span>, <span class="string">"message1"</span>))</span><br><span class="line"><span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">	fmt.Println(<span class="string">"key not found"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fmt.Println(world)</span><br></pre></td></tr></table></figure>
+<h1 id="u5B8C_u6574_u7684_u4EE3_u7801_u5982_u4E0B"><a href="#u5B8C_u6574_u7684_u4EE3_u7801_u5982_u4E0B" class="headerlink" title="完整的代码如下"></a>完整的代码如下</h1><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">"github.com/garyburd/redigo/redis"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> main() &#123;</span><br><span class="line">	c, err := redis.Dial(<span class="string">"tcp"</span>, <span class="string">"192.168.10.12:6379"</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> c.Close()</span><br><span class="line"></span><br><span class="line">	c.Send(<span class="string">"auth"</span>, <span class="string">"xxx"</span>)</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//select db</span></span><br><span class="line">	c.Do(<span class="string">"select"</span>, <span class="number">1</span>)</span><br><span class="line">	<span class="comment">//set</span></span><br><span class="line">	c.Do(<span class="string">"SET"</span>, <span class="string">"message1"</span>, <span class="string">"Hello World"</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">//get</span></span><br><span class="line">	world, err := redis.String(c.Do(<span class="string">"GET"</span>, <span class="string">"message1"</span>))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="constant">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"key not found"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	fmt.Println(world)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参考站点</p>
+<p><a href="https://www.reddit.com/r/golang/comments/3dspr9/which_redis_client/" target="_blank" rel="external">https://www.reddit.com/r/golang/comments/3dspr9/which_redis_client/</a><br><a href="https://godoc.org/github.com/garyburd/redigo/redis" target="_blank" rel="external">https://godoc.org/github.com/garyburd/redigo/redis</a></p>
+<p>have fun !</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-07-05T07:51:18.000Z"><a href="/2016/07/05/Golang命令行编程/">2016-07-05</a></time>
       
       
@@ -603,47 +646,6 @@
 
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2016-05-20T07:38:45.000Z"><a href="/2016/05/20/kingshard初体验/">2016-05-20</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2016/05/20/kingshard初体验/">kingshard初体验</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>kingshard是一种MySQL代理,用于实现读写分离和分库分表,以及一些其他功能.<br>由于其使用Golang开发,部署之前需要先安装Golang.<br>Golang版本在1.3以上即可,如果使用EPEL源,安装的就是Golang 1.5,满足要求.</p>
-<p>epel源安装Golang<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y golang</span><br></pre></td></tr></table></figure></p>
-<p>kingshard编译安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/flike/kingshard.git /usr/<span class="built_in">local</span>/src/github.com/flike/kingshard</span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/github.com/flike/kingshard</span><br><span class="line"><span class="built_in">source</span> ./dev.sh</span><br><span class="line">make</span><br></pre></td></tr></table></figure></p>
-<p>kingshard配置<br>默认配置文件为/etc/ks.yaml,可以在启动的时候指定.<br><a href="https://github.com/flike/kingshard/blob/master/doc/KingDoc/kingshard_install_document.md" target="_blank" rel="external">配置文件说明</a></p>
-<p>kingshard启动<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/kingshard</span><br><span class="line">./bin/kingshard -config etc/ks.yaml</span><br></pre></td></tr></table></figure></p>
-<p>kingshard连接<br>默认端口是9696<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#账户名密码是kingshard配置中指定的账户密码</span></span><br><span class="line">mysql -uroot -p -hIP -P9696</span><br></pre></td></tr></table></figure></p>
-<p>kingshard特点<br>创建分表后,插入和查询操作都会自动关联到分表中.<br>只支持带条件的查询.</p>
-<p>参考站点<br><a href="https://github.com/flike/kingshard" target="_blank" rel="external">https://github.com/flike/kingshard</a><br><a href="http://www.ttlsa.com/kingshard/kingshard_quick_try/" target="_blank" rel="external">http://www.ttlsa.com/kingshard/kingshard_quick_try/</a></p>
-<p>have fun !</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
 
 <nav id="pagination">
   
@@ -675,7 +677,7 @@
   
     <li><a href="/tags/git/">git</a><small>1</small></li>
   
-    <li><a href="/tags/golang/">golang</a><small>1</small></li>
+    <li><a href="/tags/golang/">golang</a><small>2</small></li>
   
     <li><a href="/tags/java/">java</a><small>1</small></li>
   
