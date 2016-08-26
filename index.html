@@ -50,6 +50,71 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-08-26T01:56:01.000Z"><a href="/2016/08/26/在阿里云ECS上部署OpenVPN/">2016-08-26</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/08/26/在阿里云ECS上部署OpenVPN/">在阿里云ECS上部署OpenVPN</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>在阿里云上有一批ECS虚拟机,大部分都走的VPC私有网络,一个路由器下面分配了多个交换机,有私有网段.需要安装一个VPN,方便登陆管理.</p>
+<p>此次的平台是CentOS 7,和CentOS 6不同的地方有两个,一个是使用Systemd来管理OpenVPN的服务,另一个是使用FirewallD进行防火墙管理.<br>部署过程如下.</p>
+<h1 id="u5B89_u88C5"><a href="#u5B89_u88C5" class="headerlink" title="安装"></a>安装</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y openvpn easy-rsa</span><br></pre></td></tr></table></figure>
+<h1 id="u670D_u52A1_u7AEF_u914D_u7F6E"><a href="#u670D_u52A1_u7AEF_u914D_u7F6E" class="headerlink" title="服务端配置"></a>服务端配置</h1><h2 id="u914D_u7F6E_u6587_u4EF6"><a href="#u914D_u7F6E_u6587_u4EF6" class="headerlink" title="配置文件"></a>配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp <span class="operator">-a</span> /usr/share/easy-rsa /etc/openvpn/</span><br></pre></td></tr></table></figure>
+<h2 id="u7F16_u8F91vars"><a href="#u7F16_u8F91vars" class="headerlink" title="编辑vars"></a>编辑vars</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /etc/openvpn/easy-rsa/<span class="number">2.0</span></span><br><span class="line">vi vars 编辑以下内容</span><br><span class="line"><span class="built_in">export</span> KEY_COUNTRY=<span class="string">"CN"</span></span><br><span class="line"><span class="built_in">export</span> KEY_PROVINCE=<span class="string">"BJ"</span></span><br><span class="line"><span class="built_in">export</span> KEY_CITY=<span class="string">"Beijing"</span></span><br><span class="line"><span class="built_in">export</span> KEY_ORG=<span class="string">"TT"</span></span><br><span class="line"><span class="built_in">export</span> KEY_EMAIL=<span class="string">"admin@example.com"</span></span><br><span class="line"><span class="built_in">export</span> KEY_OU=<span class="string">"IT"</span></span><br></pre></td></tr></table></figure>
+<h2 id="u751F_u6210_u8BC1_u4E66"><a href="#u751F_u6210_u8BC1_u4E66" class="headerlink" title="生成证书"></a>生成证书</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /etc/openvpn/easy-rsa/<span class="number">2.0</span></span><br><span class="line">ln <span class="operator">-s</span> openssl-<span class="number">1.0</span>.<span class="number">0</span>.cnf openssl.cnf</span><br><span class="line"><span class="built_in">source</span> ./vars</span><br><span class="line"><span class="built_in">source</span> ./clean-all</span><br><span class="line">./build-ca</span><br><span class="line">./build-key-server aliyunvpn</span><br><span class="line">./bulid-key aliyunuser</span><br><span class="line">./build-dh</span><br></pre></td></tr></table></figure>
+<h2 id="u914D_u7F6E_u6587_u4EF6-1"><a href="#u914D_u7F6E_u6587_u4EF6-1" class="headerlink" title="配置文件"></a>配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cp <span class="operator">-a</span> /etc/openvpn/easy-rsa/<span class="number">2.0</span>/keys/ca.crt /etc/openvpn/</span><br><span class="line">cp <span class="operator">-a</span> /etc/openvpn/easy-rsa/<span class="number">2.0</span>/keys/aliyunvpn.crt /etc/openvpn/</span><br><span class="line">cp <span class="operator">-a</span> /etc/openvpn/easy-rsa/<span class="number">2.0</span>/keys/aliyunvon.key /etc/openvpn/</span><br><span class="line">cp <span class="operator">-a</span> /etc/openvpn/easy-rsa/<span class="number">2.0</span>/keys/dh2048.pem /etc/openvpn/</span><br><span class="line">cp /usr/share/doc/openvpn-<span class="number">2.3</span>.<span class="number">11</span>/sample/sample-config-files/server.conf /etc/openvpn/</span><br></pre></td></tr></table></figure>
+<h2 id="server-conf_u5185_u5BB9_u5982_u4E0B"><a href="#server-conf_u5185_u5BB9_u5982_u4E0B" class="headerlink" title="server.conf内容如下"></a>server.conf内容如下</h2><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">port 1194&#10;proto udp&#10;dev tun&#10;ca ca.crt&#10;cert aliyunvpn.crt&#10;key aliyunvpn.key  # This file should be kept secret&#10;;plugin /etc/openvpn/openvpn-plugin-auth-pam.so openvpn&#10;;client-cert-not-required&#10;;username-as-common-name&#10;dh dh2048.pem&#10;server 172.16.0.0 255.255.255.0&#10;ifconfig-pool-persist ipp.txt&#10;push &#34;route 172.16.0.0 255.240.0.0&#34;&#10;push &#34;dhcp-option DNS 223.5.5.5&#34;&#10;client-to-client&#10;keepalive 10 120&#10;comp-lzo&#10;user nobody&#10;group nobody&#10;persist-key&#10;persist-tun&#10;status /var/log/openvpn-status.log&#10;log    /var/log/openvpn.log&#10;verb 3</span><br></pre></td></tr></table></figure>
+<h2 id="u5F00_u542F_u8F6C_u53D1"><a href="#u5F00_u542F_u8F6C_u53D1" class="headerlink" title="开启转发"></a>开启转发</h2><p>vi /etc/sysctl.conf 添加<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.ip_forward=1</span><br></pre></td></tr></table></figure></p>
+<p>生效<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl -p</span><br></pre></td></tr></table></figure></p>
+<h2 id="firewall_u9632_u706B_u5899_u6DFB_u52A0_u7B56_u7565"><a href="#firewall_u9632_u706B_u5899_u6DFB_u52A0_u7B56_u7565" class="headerlink" title="firewall防火墙添加策略"></a>firewall防火墙添加策略</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --permanent --add-service openvpn</span><br><span class="line">firewall-cmd --permanent --add-masquerade</span><br></pre></td></tr></table></figure>
+<h2 id="systemctl_u6DFB_u52A0_u7CFB_u7EDF_u670D_u52A1_u5E76_u542F_u52A8"><a href="#systemctl_u6DFB_u52A0_u7CFB_u7EDF_u670D_u52A1_u5E76_u542F_u52A8" class="headerlink" title="systemctl添加系统服务并启动"></a>systemctl添加系统服务并启动</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> openvpn@server.service</span><br><span class="line">systemctl start openvpn@server.service</span><br></pre></td></tr></table></figure>
+<h2 id="u963F_u91CC_u4E91_u5B89_u5168_u7EC4_u914D_u7F6E"><a href="#u963F_u91CC_u4E91_u5B89_u5168_u7EC4_u914D_u7F6E" class="headerlink" title="阿里云安全组配置"></a>阿里云安全组配置</h2><p>添加一条允许UDP 1194端口访问的规则</p>
+<h1 id="u5BA2_u6237_u7AEF_u914D_u7F6E_28linux_u4E3A_u4F8B_29"><a href="#u5BA2_u6237_u7AEF_u914D_u7F6E_28linux_u4E3A_u4F8B_29" class="headerlink" title="客户端配置(linux为例)"></a>客户端配置(linux为例)</h1><h2 id="u5B89_u88C5openvpn"><a href="#u5B89_u88C5openvpn" class="headerlink" title="安装openvpn"></a>安装openvpn</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y openvpn</span><br></pre></td></tr></table></figure>
+<h2 id="u590D_u5236_u670D_u52A1_u7AEF_u4EE5_u4E0B_u6587_u4EF6_u5230_u5BA2_u6237_u7AEF_u5BF9_u5E94_u6587_u4EF6_u5939_u4E2D"><a href="#u590D_u5236_u670D_u52A1_u7AEF_u4EE5_u4E0B_u6587_u4EF6_u5230_u5BA2_u6237_u7AEF_u5BF9_u5E94_u6587_u4EF6_u5939_u4E2D" class="headerlink" title="复制服务端以下文件到客户端对应文件夹中"></a>复制服务端以下文件到客户端对应文件夹中</h2><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aliyunuser.crt&#10;aliyunuser.key&#10;ca.crt</span><br></pre></td></tr></table></figure>
+<h2 id="aliyun-ovpn_u914D_u7F6E"><a href="#aliyun-ovpn_u914D_u7F6E" class="headerlink" title="aliyun.ovpn配置"></a>aliyun.ovpn配置</h2><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client&#10;dev tun&#10;proto udp&#10;remote remote ip or domain&#10;port 1194&#10;remote-random&#10;resolv-retry infinite&#10;nobind&#10;persist-key&#10;persist-tun&#10;ca /etc/openvpn/config/ca.crt&#10;cert /etc/openvpn/config/aliyunuser.crt&#10;key /etc/openvpn/config/aliyunuser.key&#10;ns-cert-type server&#10;route-delay 2&#10;comp-lzo&#10;verb 3</span><br></pre></td></tr></table></figure>
+<h2 id="u542F_u52A8_u547D_u4EE4"><a href="#u542F_u52A8_u547D_u4EE4" class="headerlink" title="启动命令"></a>启动命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openvpn --config /etc/openvpn/config/aliyun.ovpn</span><br></pre></td></tr></table></figure>
+<h1 id="u9644_u5F55_PAM_u548C_u5BC6_u7801_u8BA4_u8BC1_u65B9_u5F0F"><a href="#u9644_u5F55_PAM_u548C_u5BC6_u7801_u8BA4_u8BC1_u65B9_u5F0F" class="headerlink" title="附录 PAM和密码认证方式"></a>附录 PAM和密码认证方式</h1><h2 id="u590D_u5236openvpn-plugin-auth-pam-so_u5230openvpn_u76EE_u5F55_u4E0B"><a href="#u590D_u5236openvpn-plugin-auth-pam-so_u5230openvpn_u76EE_u5F55_u4E0B" class="headerlink" title="复制openvpn-plugin-auth-pam.so到openvpn目录下"></a>复制openvpn-plugin-auth-pam.so到openvpn目录下</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp <span class="operator">-a</span> /usr/lib64/openvpn/plugins/openvpn-plugin-auth-pam.so /etc/openvpn/</span><br></pre></td></tr></table></figure>
+<h2 id="u5728/etc/pam-d/_u76EE_u5F55_u4E0B_u521B_u5EFAopenvpn_u6587_u4EF6"><a href="#u5728/etc/pam-d/_u76EE_u5F55_u4E0B_u521B_u5EFAopenvpn_u6587_u4EF6" class="headerlink" title="在/etc/pam.d/目录下创建openvpn文件"></a>在/etc/pam.d/目录下创建openvpn文件</h2><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/pam.d/openvpn&#10;auth    required        pam_unix.so    shadow    nodelay&#10;account required        pam_unix.so</span><br></pre></td></tr></table></figure>
+<h2 id="u4FEE_u6539/etc/openvpn/server-conf_2C_u6DFB_u52A0_u4EE5_u4E0B_u5185_u5BB9"><a href="#u4FEE_u6539/etc/openvpn/server-conf_2C_u6DFB_u52A0_u4EE5_u4E0B_u5185_u5BB9" class="headerlink" title="修改/etc/openvpn/server.conf,添加以下内容"></a>修改/etc/openvpn/server.conf,添加以下内容</h2><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plugin /etc/openvpn/openvpn-plugin-auth-pam.so openvpn&#10;client-cert-not-required&#10;username-as-common-name</span><br></pre></td></tr></table></figure>
+<h2 id="u521B_u5EFA_u8D26_u6237"><a href="#u521B_u5EFA_u8D26_u6237" class="headerlink" title="创建账户"></a>创建账户</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">useradd aliyunuser <span class="operator">-s</span> /sbin/nologin</span><br><span class="line">passwd aliyunuser</span><br></pre></td></tr></table></figure>
+<h2 id="u5BA2_u6237_u7AEF_u914D_u7F6E"><a href="#u5BA2_u6237_u7AEF_u914D_u7F6E" class="headerlink" title="客户端配置"></a>客户端配置</h2><p>aliyun.ovpn<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client&#10;dev tun&#10;proto udp&#10;remote remote server ip&#10;port 1194&#10;remote-random&#10;resolv-retry infinite&#10;nobind&#10;persist-key&#10;persist-tun&#10;ca /etc/openvpn/config/ca.crt&#10;auth-user-pass&#10;ns-cert-type server&#10;route-delay 2&#10;comp-lzo&#10;verb 3</span><br></pre></td></tr></table></figure></p>
+<p>user文件<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username&#10;password</span><br></pre></td></tr></table></figure></p>
+<p>客户端启动<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/sbin/openvpn --config /etc/openvpn/config/aliyun.ovpn --auth-user-pass /etc/openvpn/config/user</span><br></pre></td></tr></table></figure></p>
+<h1 id="u53C2_u8003_u7AD9_u70B9"><a href="#u53C2_u8003_u7AD9_u70B9" class="headerlink" title="参考站点"></a>参考站点</h1><p><a href="https://help.aliyun.com/knowledge_detail/42521.html" target="_blank" rel="external">https://help.aliyun.com/knowledge_detail/42521.html</a></p>
+<p><a href="https://wanglu.info/983.html" target="_blank" rel="external">https://wanglu.info/983.html</a></p>
+<p><a href="https://www.digitalocean.com/community/tutorials/how-to-setup-and-configure-an-openvpn-server-on-centos-7" target="_blank" rel="external">https://www.digitalocean.com/community/tutorials/how-to-setup-and-configure-an-openvpn-server-on-centos-7</a></p>
+<p><a href="http://unix.stackexchange.com/questions/149144/configuring-openvpn-to-use-firewalld-instead-of-iptables-on-centos-7" target="_blank" rel="external">http://unix.stackexchange.com/questions/149144/configuring-openvpn-to-use-firewalld-instead-of-iptables-on-centos-7</a></p>
+<p><a href="http://unix.stackexchange.com/questions/88667/openvpn-socket-bind-failed-on-local-address-af-inet-ip1194-cannot-assign-r" target="_blank" rel="external">http://unix.stackexchange.com/questions/88667/openvpn-socket-bind-failed-on-local-address-af-inet-ip1194-cannot-assign-r</a></p>
+<p><a href="https://www.linuxsysadmintutorials.com/setup-pam-authentication-with-openvpns-auth-pam-module.html" target="_blank" rel="external">https://www.linuxsysadmintutorials.com/setup-pam-authentication-with-openvpns-auth-pam-module.html</a></p>
+<p><a href="https://wiki.archlinux.org/index.php/OpenVPN_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87" target="_blank" rel="external">https://wiki.archlinux.org/index.php/OpenVPN_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87</a>)</p>
+<p><a href="https://yq.aliyun.com/articles/14793" target="_blank" rel="external">https://yq.aliyun.com/articles/14793</a></p>
+<p><a href="http://www.gooth.org/archives/1009" target="_blank" rel="external">http://www.gooth.org/archives/1009</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-07-06T07:32:44.000Z"><a href="/2016/07/06/redigo简单使用/">2016-07-06</a></time>
       
       
@@ -603,49 +668,6 @@
 
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2016-05-24T02:58:44.000Z"><a href="/2016/05/24/ActiveMQ高可用架构配置优化/">2016-05-24</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2016/05/24/ActiveMQ高可用架构配置优化/">ActiveMQ高可用架构配置优化</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>ActiveMQ是基于JAVA开发的一款开源消息队列软件.本文所述ActiveMQ架构为基于zookeeper实现高可用,基于LevelDB实现消息队列数据的持久化.</p>
-<p>JDK安装,Zookeeper集群安装,ActiveMQ安装请参考其他文档,本文略.</p>
-<p><strong>ActiveMQ配置优化</strong><br>1 调整默认的JVM内存<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#20462;&#25913;$activemq_home/bin/env&#10;&#40664;&#35748;&#20869;&#23481;&#10;ACTIVEMQ_OPTS_MEMORY=&#34;-Xms64M -Xmx1G&#34;&#10;&#20462;&#25913;&#20869;&#23481;(&#26681;&#25454;&#23454;&#38469;&#26381;&#21153;&#37197;&#32622;&#36827;&#34892;&#20462;&#25913;)&#10;ACTIVEMQ_OPTS_MEMORY=&#34;-Xms4G -Xmx8G&#34;</span><br></pre></td></tr></table></figure></p>
-<p>2 调整activemq.xml文件<br>2.1 流量控制,不同队列分配不同内存使用上限,避免使用全局变量导致一个队列出现问题,影响其他队列运行.<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#31034;&#20363;:&#10;&#60;policyEntry queue=&#34;*.VirtualTopic.Process.Result&#34; producerFlowControl=&#34;true&#34; memoryLimit=&#34;200mb&#34;/&#62;&#10;&#60;policyEntry queue=&#34;*.VirtualTopic.Process.Other&#34; producerFlowControl=&#34;true&#34; memoryLimit=&#34;20mb&#34;/&#62;</span><br></pre></td></tr></table></figure></p>
-<p>2.2 systemUsage配置超时时间,单位为毫秒<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;systemUsage&#62;&#10; &#60;systemUsage sendFailIfNoSpaceAfterTimeout=&#34;3000&#34;&#62;&#10;   &#60;memoryUsage&#62;&#10;     &#60;memoryUsage percentOfJvmHeap=&#34;70&#34; /&#62;&#10;   &#60;/memoryUsage&#62;&#10; &#60;/systemUsage&#62;&#10;&#60;/systemUsage&#62;</span><br></pre></td></tr></table></figure></p>
-<p>2.3 如果没有持久化需求,可以在broker中设置非持久化参数,提高性能<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;broker persistent=&#34;false&#34;&#62;&#10;&#60;/broker&#62;</span><br></pre></td></tr></table></figure></p>
-<p>3 应用侧配置优化<br>3.1 设置TCP协议传输的socketBufferSize<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socketBufferSize&#35745;&#31639;&#20844;&#24335;buffer_size = bandwidth * RTT&#10;&#31034;&#20363;: &#10;tcp://IP:61616?socketBufferSize=1500000(140K&#24038;&#21491;)</span><br></pre></td></tr></table></figure></p>
-<p>3.2 配置Prefetch limit(消费者连接程序性能优化)<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#31034;&#20363;:&#10;tcp://localhost:61616?jms.prefetchPolicy.queuePrefetch=1(&#23545;&#20110;&#19968;&#20010;&#38431;&#21015;,&#26377;&#19968;&#32452;&#28040;&#36153;&#32773;&#36830;&#25509;,&#20570;&#36127;&#36733;&#20998;&#25285;,&#20540;&#35774;&#20026;1&#25110;0)&#10;&#31034;&#20363;:&#10;queue = new ActiveMQQueue(&#34;TEST.QUEUE?consumer.prefetchSize=10&#34;);(&#23545;&#20110;&#19968;&#20010;&#38431;&#21015;,&#21482;&#26377;&#21333;&#29420;&#30340;&#28040;&#36153;&#32773;&#36830;&#25509;,&#20540;&#21487;&#20197;&#35774;&#32622;&#30340;&#22823;&#19968;&#20123;)&#10;consumer = session.createConsumer(queue);</span><br></pre></td></tr></table></figure></p>
-<p>3.3 使用async模式<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#31034;&#20363;:&#10;tcp://localhost:61616?jms.useAsyncSend=true</span><br></pre></td></tr></table></figure></p>
-<p>参考站点<br><a href="http://blogs.sourceallies.com/2014/10/activemq-memory-tuning/" target="_blank" rel="external">http://blogs.sourceallies.com/2014/10/activemq-memory-tuning/</a><br><a href="http://www.mastertheintegration.com/core-apache-projects/activemq/introduction-to-activemq/tuning-activemq-tips.html" target="_blank" rel="external">http://www.mastertheintegration.com/core-apache-projects/activemq/introduction-to-activemq/tuning-activemq-tips.html</a><br><a href="http://blog.christianposta.com/activemq/speeding-up-activemq-persistent-messaging-performance-by-25x/" target="_blank" rel="external">http://blog.christianposta.com/activemq/speeding-up-activemq-persistent-messaging-performance-by-25x/</a><br><a href="http://www.cnblogs.com/bornteam/p/4462662.html" target="_blank" rel="external">http://www.cnblogs.com/bornteam/p/4462662.html</a><br><a href="http://manzuosteve.blog.51cto.com/1966239/1192190" target="_blank" rel="external">http://manzuosteve.blog.51cto.com/1966239/1192190</a></p>
-<p>have fun !</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
 
 <nav id="pagination">
   
@@ -697,7 +719,7 @@
   
     <li><a href="/tags/nginx/">nginx</a><small>1</small></li>
   
-    <li><a href="/tags/openvpn/">openvpn</a><small>1</small></li>
+    <li><a href="/tags/openvpn/">openvpn</a><small>2</small></li>
   
     <li><a href="/tags/redis/">redis</a><small>2</small></li>
   
