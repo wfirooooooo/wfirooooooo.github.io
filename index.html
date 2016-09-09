@@ -50,6 +50,68 @@
     <header>
       
         <div class="icon"></div>
+        <time datetime="2016-09-09T02:18:04.000Z"><a href="/2016/09/09/使用hubot构建slack机器人/">2016-09-09</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2016/09/09/使用hubot构建slack机器人/">使用hubot构建slack机器人</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>鼓捣了鼓捣用hubot构建slack机器人,简单记录一下.</p>
+<h1 id="u73AF_u5883_u4FE1_u606F"><a href="#u73AF_u5883_u4FE1_u606F" class="headerlink" title="环境信息"></a>环境信息</h1><ul>
+<li>美团云主机</li>
+<li>CentOS 7.0</li>
+</ul>
+<h1 id="u5B89_u88C5nodejs_u548Cnpm"><a href="#u5B89_u88C5nodejs_u548Cnpm" class="headerlink" title="安装nodejs和npm"></a>安装nodejs和npm</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y npm</span><br><span class="line">node -v</span><br></pre></td></tr></table></figure>
+<h1 id="u5347_u7EA7npm"><a href="#u5347_u7EA7npm" class="headerlink" title="升级npm"></a>升级npm</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install npm -g </span><br><span class="line">npm -v</span><br></pre></td></tr></table></figure>
+<h1 id="u5B89_u88C5hubot_generator"><a href="#u5B89_u88C5hubot_generator" class="headerlink" title="安装hubot generator"></a>安装hubot generator</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hubot coffee-script yo generator-hubot</span><br></pre></td></tr></table></figure>
+<h1 id="u65B0_u5EFA_u6587_u4EF6_u5939_u5E76_u914D_u7F6E_u6743_u9650"><a href="#u65B0_u5EFA_u6587_u4EF6_u5939_u5E76_u914D_u7F6E_u6743_u9650" class="headerlink" title="新建文件夹并配置权限"></a>新建文件夹并配置权限</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir /root/hubot</span><br><span class="line">mkdir /root/.config</span><br><span class="line">chmod -R g+rwx /root/.config</span><br><span class="line">chmod -R g+rwx /root/hubot</span><br><span class="line">chmod -R g+rwx /root/.npm</span><br></pre></td></tr></table></figure>
+<h1 id="u5B89_u88C5hubot"><a href="#u5B89_u88C5hubot" class="headerlink" title="安装hubot"></a>安装hubot</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /root/hubot</span><br><span class="line">yo hubot(根据提示操作,Bot adapter选择slack</span><br></pre></td></tr></table></figure>
+<h1 id="slack_u76F8_u5173_u914D_u7F6E"><a href="#slack_u76F8_u5173_u914D_u7F6E" class="headerlink" title="slack相关配置"></a>slack相关配置</h1><ol>
+<li><p><a href="https://www.liudon.org/1329.html" target="_blank" rel="external">在slack上申请bot账号</a></p>
+</li>
+<li><p>配置slack,根据申请的token运行hubot</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env HUBOT_SLACK_TOKEN=xoxb-<span class="number">76566984261</span>-HdKvsVBcWpSyS7p3OqI98JGo ./bin/hubot --adapter slack</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="u8BA9hubot_u80FD_u591F_u6267_u884C_u811A_u672C"><a href="#u8BA9hubot_u80FD_u591F_u6267_u884C_u811A_u672C" class="headerlink" title="让hubot能够执行脚本"></a>让hubot能够执行脚本</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hubot-script-shellcmd</span><br></pre></td></tr></table></figure>
+<p> <strong>tips</strong>:</p>
+<ol>
+<li><p>编写的脚本需要放到以下文件夹中</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/root/hubot/node_modules/hubot-script-shellcmd/bash/handlers</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>脚本文件需要有执行权限</p>
+</li>
+</ol>
+<h1 id="u53C2_u8003_u7AD9_u70B9"><a href="#u53C2_u8003_u7AD9_u70B9" class="headerlink" title="参考站点"></a>参考站点</h1><p><a href="https://hubot.github.com/docs/" target="_blank" rel="external">https://hubot.github.com/docs/</a></p>
+<p><a href="https://github.com/slackhq/hubot-slack" target="_blank" rel="external">https://github.com/slackhq/hubot-slack</a></p>
+<p><a href="https://segmentfault.com/a/1190000006681056" target="_blank" rel="external">https://segmentfault.com/a/1190000006681056</a></p>
+<p><a href="https://www.liudon.org/1329.html" target="_blank" rel="external">https://www.liudon.org/1329.html</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2016-08-26T01:56:01.000Z"><a href="/2016/08/26/在阿里云ECS上部署OpenVPN/">2016-08-26</a></time>
       
       
@@ -580,94 +642,6 @@
 
 
 
-  <article class="post">
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2016-05-24T10:48:20.000Z"><a href="/2016/05/24/githug闯关记录/">2016-05-24</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2016/05/24/githug闯关记录/">githug闯关记录</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>1 初始化git仓库<br>git init</p>
-<p>2 配置git账户和邮箱<br>git config –global user.name “wfirooooooo”<br>git config –global user.email “parasiempre@126.com”</p>
-<p>3 添加README文件到暂存区<br>git add README</p>
-<p>4 提交README文件<br>git commit -m “add README”</p>
-<p>5 clone一个git仓库<br>git clone <a href="https://github.com/Gazler/cloneme" target="_blank" rel="external">https://github.com/Gazler/cloneme</a></p>
-<p>6 clone一个git仓库到指定文件夹<br>git clone <a href="https://github.com/Gazler/cloneme" target="_blank" rel="external">https://github.com/Gazler/cloneme</a> my_cloned_repo</p>
-<p>7 git仓库忽略.swp文件<br>编辑.gitignore文件,添加以下内容<br>*.swp</p>
-<p>8 git仓库忽略.a后缀的文件,但不包括lib.a<br>编辑.gitignore文件,添加以下内容<br>*.a<br>!lib.a</p>
-<p>9 查找untracked的文件<br>git status</p>
-<p>10 会被提交的文件数量<br>git status<br>备注: 只有前两个文件会被提交<br>untracked - 新增的文件.git不知道他们的存在<br>not staged - 被索引过又被修改的文件<br>staged - 通过git add后即将被提交的文件</p>
-<p>11 从git仓库中删除已经在工作区中删除的文件<br>git status<br>git rm deleteme.rb</p>
-<p>12 删除暂存区中的文件,而不要把文件从文件系统中删除,仅仅在git中删除<br>git status<br>git rm –cached deleteme.rb</p>
-<p>13 保存修改的文件,稍后继续修改,但不提交<br>git stash<br>备注: 恢复文件使用git stash pop</p>
-<p>14 修改oldfile.txt文件名为newfile.txt<br>git mv oldfile.txt newfile.txt</p>
-<p>15 把git仓库中已有的文件重构到新的文件夹中<br>mkdir src<br>git mv *.html src/</p>
-<p>16 查看代码提交日志<br> git log</p>
-<p>17 给commit添加tag<br>git tag new_tag</p>
-<p>18 推送tags到远程仓库<br>git push –tags</p>
-<p>19 commit漏掉的文件,添加到上一次的commit中<br>git add forgotten_file.rb<br>git commit –amend</p>
-<p>20 修改commit日期<br> git commit -m “commit next day” –date “2016-05-25 16:00:00”</p>
-<p>21 使用reset命令把误添加的文件移出来<br>git status<br>git reset to_commit_second.rb<br>git status</p>
-<p>22 撤回最后一次的提交,暂存区的索引不改<br>git reset HEAD~1 –soft</p>
-<p>23 回滚config.rb为最后一次提交的内容<br>git checkout config.rb</p>
-<p>24 把git仓库push到远端仓库<br>git remote</p>
-<p>25 获取远端仓库的url<br>git remote -v</p>
-<p>26 从初始仓库拉取变更<br>git pull origin master</p>
-<p>27 给远端仓库origin添加url<br>git remote add origin <a href="https://github.com/githug/githug" target="_blank" rel="external">https://github.com/githug/githug</a></p>
-<p>28 远端仓库已经重建主分支,提交到主分支并传到远端<br> git rebase origin/master<br>git push</p>
-<p>29 查找commit过文件变化的行<br>git diff</p>
-<p>30 查找文件最后的修改者<br>git blame config.rb</p>
-<p>31 创建分支<br>git branch test_code</p>
-<p>32 切换到新创建的分支<br>git checkout -b my_branch</p>
-<p>33 在指定版本库上修改bug<br>git checkout v1.2</p>
-<p>34 在有同名的tag和branch时,切换到tag需要显式表示(git认为分支的优先级更高)<br>git checkout tags/v1.2</p>
-<p>35 忘记创建分支就提交了,创建一个提交前的分支(不包含最新一次提交的分支)<br>git branch test_branch HEAD~1</p>
-<p>36 创建了过多的分支,删除无用的分支<br>git branch -d delete_me</p>
-<p>37 本地分支提交的变更,不想合并到主分支,却希望分享出去<br>git push origin test_branch</p>
-<p>38 把特性分支的文件合并到主分支<br>git merge feature</p>
-<p>39 远程仓库更新的代码,只是查看,而不要合并到本地<br>git fetch origin</p>
-<p>40 把feature分支rebase到master分支<br>git rebase master feature</p>
-<p>41 优化仓库<br>git repack -d</p>
-<p>42 删除特性分支,保留有用的commit内容<br>git log new-feature -p README.md<br>找到需要合并到主分支commit的hash值<br>git cherry-pick ca32a6dac7b6f97975edbe19a4296c2ee7682f68</p>
-<p>43 deadline将至,查看有哪些TODO工作<br>git grep “TODO”</p>
-<p>44 修改拼写错误的信息<br>git log –oneline<br>根据查询结果确定错误<br>git rebase -i HEAD~2<br>pick改为r<br>修改coommit为正确拼写<br>报错退出</p>
-<p>45 合并多次提交为一次提交,在推送到远端仓库之前操作<br> git log –oneline<br>合并后3个到第二个commit<br>git rebase -i HEAD~4<br>2,3,4行的pick改为s<br>保存退出</p>
-<p>46 合并特性分支时,所有提交合并为一个commit<br>git log long-feature-branch –oneline<br>git merge long-feature-branch –squash<br>git commit -m “merge long-feature-branch”</p>
-<p>47 修改提交的顺序<br>git log –oneline 查看提交错误的顺序<br>git rebase -i HEAD~2    编辑互换错误的顺序</p>
-<p>48 查找哪次commit提交了bug<br>git log –oneline 获得第一次提交的hash值<br>git bisect start HEAD f608824 开始调试<br>git bisect run make test    发现bug commit</p>
-<p>49 修改了一个文件,此文件属于两个特性分支,只提交到第一个特性分支<br>git add feature.rb -p 手动编辑文件,删除其他feature内容<br>git status 查看状态</p>
-<p>50 修改其他问题后,忘记先前工作的分支,如何找回这个分支<br>git reflog 查看先前工作得分支<br>git checkout solve_world_hunger</p>
-<p>51 回滚某次提交<br>git log –oneline    找到需要回滚的提交hash<br>git revert 6c7a0a5</p>
-<p>52 恢复删除的commit<br>git reflog    找到需要恢复的commit hash值<br>git cherry-pick bfd5f91</p>
-<p>53 合并分支到主分支之前,需要修复错误和冲突<br>git merge mybranch 确定冲突文件<br>vim poem.txt    修改冲突文件,删除标识冲突的行<br>git add<br>git commit</p>
-<p>54 想把一个远程仓库导入到工程文件夹中<br>git submodule add <a href="https://github.com/jackmaney/githug-include-me" target="_blank" rel="external">https://github.com/jackmaney/githug-include-me</a></p>
-<p>参考站点<br><a href="https://codingstyle.cn/topics/181" target="_blank" rel="external">https://codingstyle.cn/topics/181</a><br><a href="http://fancyoung.com/blog/githug-cheat-sheet/" target="_blank" rel="external">http://fancyoung.com/blog/githug-cheat-sheet/</a></p>
-<p>have fun !</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
 
 <nav id="pagination">
   
@@ -694,6 +668,8 @@
     <li><a href="/tags/activemq/">activemq</a><small>1</small></li>
   
     <li><a href="/tags/ansible/">ansible</a><small>2</small></li>
+  
+    <li><a href="/tags/bot/">bot</a><small>1</small></li>
   
     <li><a href="/tags/docker/">docker</a><small>1</small></li>
   
